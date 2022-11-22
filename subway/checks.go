@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -16,24 +18,14 @@ const (
 )
 
 func verifySignature(ctx *gin.Context, publicKey ed25519.PublicKey, handler gin.HandlerFunc) {
-	signature := ctx.Request.Header.Get(HeaderSignature)
-
-	if !verifyEd25519Header(signature) {
+	sig, ok := verifyEd25519Header(ctx.Request.Header.Get(HeaderSignature))
+	if !ok {
 		ctx.Status(http.StatusUnauthorized)
 
 		return
 	}
 
-	sig, err := hex.DecodeString(signature)
-	if err != nil {
-		ctx.Status(http.StatusBadRequest)
-
-		return
-	}
-
 	timestamp := ctx.Request.Header.Get(HeaderTimestamp)
-
-	defer ctx.Request.Body.Close()
 
 	body, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
@@ -42,29 +34,33 @@ func verifySignature(ctx *gin.Context, publicKey ed25519.PublicKey, handler gin.
 		return
 	}
 
+	// Preserve original response.
+	ctx.Request.Body.Close()
+	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+
 	verified := ed25519.Verify(publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
-	if verified {
-		handler(ctx)
+	if !verified {
+		ctx.String(http.StatusUnauthorized, ErrInvalidRequestSignature.Error())
 
 		return
 	}
 
-	ctx.String(http.StatusBadRequest, ErrInvalidRequestSignature.Error())
+	handler(ctx)
 }
 
-func verifyEd25519Header(value string) bool {
+func verifyEd25519Header(value string) ([]byte, bool) {
 	if value == "" {
-		return false
+		return nil, false
 	}
 
 	sig, err := hex.DecodeString(value)
 	if err != nil {
-		return false
+		return nil, false
 	}
 
 	if len(sig) != ed25519.SignatureSize || sig[63]&224 != 0 {
-		return false
+		return nil, false
 	}
 
-	return true
+	return sig, true
 }
