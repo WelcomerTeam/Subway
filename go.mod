@@ -3,8 +3,8 @@ module github.com/WelcomerTeam/Subway
 go 1.18
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02
-	github.com/WelcomerTeam/Sandwich v0.0.0-20221122124737-16c912f7fc83
+	github.com/WelcomerTeam/Discord v0.0.0-20221122142110-5b2aa302969b
+	github.com/WelcomerTeam/Sandwich v0.0.0-20221122145418-8700c881b314
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/logger v0.2.5

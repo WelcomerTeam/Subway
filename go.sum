@@ -36,8 +36,14 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02 h1:z9revI2ZVYJlwMoWZyA0k4zsJKPi44smYS+iDXvOIqE=
 github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02/go.mod h1:xx2AEDJzKQSegernYkY2wWFPa1FgND52NxxPtqjx1s8=
+github.com/WelcomerTeam/Discord v0.0.0-20221122142110-5b2aa302969b h1:bLiF22JuODj1RFzq19v55YGjjWB9oZcSxb3IbpDqYtI=
+github.com/WelcomerTeam/Discord v0.0.0-20221122142110-5b2aa302969b/go.mod h1:xx2AEDJzKQSegernYkY2wWFPa1FgND52NxxPtqjx1s8=
 github.com/WelcomerTeam/Sandwich v0.0.0-20221122124737-16c912f7fc83 h1:ETCWrc6n4/3WKNRc3tr5vQmBwRzw9Ew8advagv1qe4g=
 github.com/WelcomerTeam/Sandwich v0.0.0-20221122124737-16c912f7fc83/go.mod h1:zm21OOOsH5dYvmcrhByEuFPPYQGfq6MnaUafV6FjRAI=
+github.com/WelcomerTeam/Sandwich v0.0.0-20221122145224-bf8b893ed92d h1:4SBmIUZ7nQS5AXqLbtZMIx0wjS5R6zvSagiO4Q9uhL4=
+github.com/WelcomerTeam/Sandwich v0.0.0-20221122145224-bf8b893ed92d/go.mod h1:zm21OOOsH5dYvmcrhByEuFPPYQGfq6MnaUafV6FjRAI=
+github.com/WelcomerTeam/Sandwich v0.0.0-20221122145418-8700c881b314 h1:wowcQzpHx82VI2hNbUO+4DZhZykz4PpGCSQM9+gcxIM=
+github.com/WelcomerTeam/Sandwich v0.0.0-20221122145418-8700c881b314/go.mod h1:zm21OOOsH5dYvmcrhByEuFPPYQGfq6MnaUafV6FjRAI=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9 h1:7yKab/Lo3nuwGHvRJk123VDXpGHHGB9DrhKJj5iLHHg=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9/go.mod h1:WB2nxQU1T3vaP9V5TzxNKVsUip4GcPttjL5KVv1VKSA=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
