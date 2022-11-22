@@ -33,15 +33,15 @@ func registerRoutes(g *gin.Engine) {
 				return
 			}
 
-			// Example.
-			ctx.JSON(http.StatusOK, discord.InteractionResponse{
-				Type: discord.InteractionCallbackTypeChannelMessageSource,
-				Data: &discord.InteractionCallbackData{
-					WebhookMessageParams: discord.WebhookMessageParams{
-						Content: "Hello World",
-					},
-				},
-			})
+			response, err := subway.ProcessInteraction(interaction)
+
+			if err != nil {
+				subway.Logger.Warn().Err(err).Send()
+
+				ctx.JSON(http.StatusInternalServerError, err.Error())
+			} else {
+				ctx.JSON(http.StatusOK, response)
+			}
 		})
 	})
 }
