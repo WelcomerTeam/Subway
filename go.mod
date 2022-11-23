@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/WelcomerTeam/Discord v0.0.0-20221122142110-5b2aa302969b
-	github.com/WelcomerTeam/Sandwich v0.0.0-20221123140332-f91aaf5efbf0
+	github.com/WelcomerTeam/Sandwich v0.0.0-20221123144957-2b37bbe9a955
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/logger v0.2.5
