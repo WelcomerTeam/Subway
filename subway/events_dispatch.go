@@ -30,18 +30,18 @@ func (subway *Subway) MustRegisterCog(cog sandwich.Cog) {
 	}
 }
 
-func (subway *Subway) RegisterCog(cog sandwich.Cog) (err error) {
+func (subway *Subway) RegisterCog(cog sandwich.Cog) error {
 	cogInfo := cog.CogInfo()
 
 	if _, ok := subway.Cogs[cogInfo.Name]; ok {
 		return sandwich.ErrCogAlreadyRegistered
 	}
 
-	err = cog.RegisterCog(subway.AsBot())
+	err := cog.RegisterCog(subway.AsBot())
 	if err != nil {
 		subway.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register sandwich.Cog")
 
-		return
+		return err
 	}
 
 	subway.Cogs[cogInfo.Name] = cog
@@ -65,13 +65,13 @@ func (subway *Subway) RegisterCog(cog sandwich.Cog) (err error) {
 	return nil
 }
 
-func (bot *Subway) RegisterCogInteractionCommandable(cog sandwich.Cog, interactionCommandable *sandwich.InteractionCommandable) {
+func (subway *Subway) RegisterCogInteractionCommandable(cog sandwich.Cog, interactionCommandable *sandwich.InteractionCommandable) {
 	for _, command := range interactionCommandable.GetAllCommands() {
 		// Add sandwich.Cog checks to all commands.
 		command.Checks = append(interactionCommandable.Checks, command.Checks...)
 
-		bot.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
+		subway.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
 
-		bot.Commands.MustAddInteractionCommand(command)
+		subway.Commands.MustAddInteractionCommand(command)
 	}
 }

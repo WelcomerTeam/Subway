@@ -35,8 +35,6 @@ const (
 	PermissionWrite    = 0o600
 )
 
-var subway *Subway
-
 type Subway struct {
 	sync.Mutex
 
@@ -94,10 +92,6 @@ type Configuration struct {
 }
 
 func NewSubway(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer, isReleaseMode bool, configurationLocation, publicKey, host, prometheusAddress, nginxAddress string) (s *Subway, err error) {
-	if subway != nil {
-		return subway, ErrSubwayAlreadyExists
-	}
-
 	s = &Subway{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
@@ -190,8 +184,6 @@ func NewSubway(conn grpc.ClientConnInterface, restInterface discord.RESTInterfac
 	// Setup gin router.
 	s.Route = s.PrepareGin()
 
-	subway = s
-
 	return s, nil
 }
 
@@ -262,7 +254,7 @@ func (subway *Subway) PrepareGin() *gin.Engine {
 
 	router.Use(gin.Recovery())
 
-	registerRoutes(router)
+	subway.registerRoutes(router)
 
 	return router
 }

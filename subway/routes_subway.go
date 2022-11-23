@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func registerRoutes(g *gin.Engine) {
+func (subway *Subway) registerRoutes(g *gin.Engine) {
 	// GET / returns subway information.
 	g.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Subway VERSION "+VERSION)
