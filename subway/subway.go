@@ -14,11 +14,11 @@ import (
 
 	discord "github.com/WelcomerTeam/Discord/discord"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
-	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 	"github.com/rs/zerolog"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"google.golang.org/grpc"
 
+	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
@@ -51,10 +51,10 @@ type Subway struct {
 
 	Route *gin.Engine `json:"-"`
 
-	Commands   *sandwich.InteractionCommandable `json:"-"`
-	Converters *sandwich.InteractionConverters  `json:"-"`
+	Commands   *InteractionCommandable `json:"-"`
+	Converters *InteractionConverters  `json:"-"`
 
-	Cogs map[string]sandwich.Cog `json:"-"`
+	Cogs map[string]Cog `json:"-"`
 
 	RESTInterface discord.RESTInterface `json:"-"`
 
@@ -100,10 +100,10 @@ func NewSubway(conn grpc.ClientConnInterface, restInterface discord.RESTInterfac
 		configurationMu: sync.RWMutex{},
 		Configuration:   &Configuration{},
 
-		Commands:   sandwich.SetupInteractionCommandable(&sandwich.InteractionCommandable{}),
-		Converters: sandwich.NewInteractionConverters(),
+		Commands:   SetupInteractionCommandable(&InteractionCommandable{}),
+		Converters: NewInteractionConverters(),
 
-		Cogs: make(map[string]sandwich.Cog),
+		Cogs: make(map[string]Cog),
 
 		RESTInterface: restInterface,
 
@@ -217,7 +217,7 @@ func (subway *Subway) LoadConfiguration(path string) (configuration *Configurati
 // Open sets up any services and starts the webserver.
 func (subway *Subway) Open() error {
 	subway.StartTime = time.Now().UTC()
-	subway.Logger.Info().Msgf("Starting sandwich. Version %s", VERSION)
+	subway.Logger.Info().Msgf("Starting  Version %s", VERSION)
 
 	go subway.PublishSimpleWebhook(subway.EmptySession, "Starting subway", "", "Version "+VERSION, EmbedColourSandwich)
 

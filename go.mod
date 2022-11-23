@@ -4,12 +4,15 @@ go 1.18
 
 require (
 	github.com/WelcomerTeam/Discord v0.0.0-20221122142110-5b2aa302969b
-	github.com/WelcomerTeam/Sandwich v0.0.0-20221122145418-8700c881b314
+	github.com/WelcomerTeam/Sandwich v0.0.0-20221123140332-f91aaf5efbf0
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/logger v0.2.5
 	github.com/gin-gonic/gin v1.8.1
 	github.com/joho/godotenv v1.4.0
+	github.com/json-iterator/go v1.1.12
+	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.14.0
 	github.com/rs/zerolog v1.28.0
 	github.com/savsgio/gotils v0.0.0-20220530130905-52f3993e8d6d
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -30,7 +33,6 @@ require (
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.15.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lithammer/fuzzysearch v1.1.5 // indirect
@@ -45,8 +47,6 @@ require (
 	github.com/nats-io/stan.go v0.10.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
