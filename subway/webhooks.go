@@ -40,7 +40,7 @@ func (subway *Subway) PublishSimpleWebhook(s *discord.Session, title string, des
 
 // PublishWebhook sends a webhook message to all added webhooks in the configuration.
 func (subway *Subway) PublishWebhook(session *discord.Session, message discord.WebhookMessageParams) {
-	for _, webhookURL := range subway.Configuration.Webhooks {
+	for _, webhookURL := range subway.webhooks {
 		webhook, err := sandwich.WebhookFromURL(webhookURL)
 		if err != nil {
 			subway.Logger.Warn().Err(err).Str("url", webhookURL).Msg("Failed to parse webhook from URL")

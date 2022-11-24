@@ -15,10 +15,8 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rs/zerolog v1.28.0
 	github.com/savsgio/gotils v0.0.0-20220530130905-52f3993e8d6d
-	github.com/zsais/go-gin-prometheus v0.1.0
 	google.golang.org/grpc v1.51.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -51,7 +49,6 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/segmentio/kafka-go v0.4.38 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
