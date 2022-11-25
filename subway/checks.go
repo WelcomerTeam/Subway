@@ -1,14 +1,10 @@
 package internal
 
 import (
-	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
-	"io"
-	"io/ioutil"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	gotils_strconv "github.com/savsgio/gotils/strconv"
 )
 
@@ -17,35 +13,15 @@ const (
 	HeaderTimestamp = "X-Signature-Timestamp"
 )
 
-func verifySignature(ctx *gin.Context, publicKey ed25519.PublicKey, handler gin.HandlerFunc) {
-	sig, ok := verifyEd25519Header(ctx.Request.Header.Get(HeaderSignature))
+func (subway *Subway) verifySignature(request *http.Request, body []byte) bool {
+	sig, ok := verifyEd25519Header(request.Header.Get(HeaderSignature))
 	if !ok {
-		ctx.Status(http.StatusUnauthorized)
-
-		return
+		return false
 	}
 
-	timestamp := ctx.Request.Header.Get(HeaderTimestamp)
+	timestamp := request.Header.Get(HeaderTimestamp)
 
-	body, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
-
-		return
-	}
-
-	// Preserve original response.
-	ctx.Request.Body.Close()
-	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	verified := ed25519.Verify(publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
-	if !verified {
-		ctx.String(http.StatusUnauthorized, ErrInvalidRequestSignature.Error())
-
-		return
-	}
-
-	handler(ctx)
+	return ed25519.Verify(subway.publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
 }
 
 func verifyEd25519Header(value string) ([]byte, bool) {

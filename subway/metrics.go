@@ -49,12 +49,13 @@ func (subway *Subway) SetupPrometheus() error {
 	prometheus.MustRegister(subwaySuccessfulInteractionTotal)
 	prometheus.MustRegister(subwayFailedInteractionTotal)
 
-	http.Handle("/metrics", promhttp.HandlerFor(
+	prometheusMux := http.NewServeMux()
+	prometheusMux.Handle("/metrics", promhttp.HandlerFor(
 		prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{},
 	))
 
-	err := http.ListenAndServe(subway.prometheusAddress, nil)
+	err := http.ListenAndServe(subway.prometheusAddress, prometheusMux)
 	if err != nil {
 		subway.Logger.Error().Str("host", subway.prometheusAddress).Err(err).Msg("Failed to serve prometheus server")
 

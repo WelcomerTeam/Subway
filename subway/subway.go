@@ -5,6 +5,7 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
+	"net/http"
 	"time"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
@@ -12,13 +13,10 @@ import (
 	"github.com/rs/zerolog"
 
 	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/logger"
-	"github.com/gin-gonic/gin"
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.1"
+const VERSION = "0.2"
 
 const (
 	PermissionsDefault = 0o744
@@ -34,8 +32,6 @@ type Subway struct {
 
 	Cogs map[string]Cog `json:"-"`
 
-	Route *gin.Engine `json:"-"`
-
 	SandwichClient protobuf.SandwichClient `json:"-"`
 	GRPCInterface  sandwich.GRPC           `json:"-"`
 	RESTInterface  discord.RESTInterface   `json:"-"`
@@ -43,9 +39,7 @@ type Subway struct {
 
 	// Environment Variables.
 	publicKey         ed25519.PublicKey
-	host              string
 	prometheusAddress string
-	nginxAddress      string
 
 	webhooks []string
 }
@@ -56,12 +50,9 @@ type SubwayOptions struct {
 	RESTInterface  discord.RESTInterface
 	Logger         zerolog.Logger
 
-	GinMode   string
 	PublicKey string
-	Host      string
 
 	PrometheusAddress string
-	NginxAddress      string
 
 	Webhooks []string
 }
@@ -74,9 +65,7 @@ func NewSubway(context context.Context, options SubwayOptions) (*Subway, error) 
 		SandwichClient: options.SandwichClient,
 		GRPCInterface:  sandwich.NewDefaultGRPCClient(),
 
-		host:              options.Host,
 		prometheusAddress: options.PrometheusAddress,
-		nginxAddress:      options.NginxAddress,
 
 		Commands:   SetupInteractionCommandable(nil),
 		Converters: NewInteractionConverters(),
@@ -94,24 +83,15 @@ func NewSubway(context context.Context, options SubwayOptions) (*Subway, error) 
 	// Setup sessions
 	subway.EmptySession = discord.NewSession(context, "", subway.RESTInterface, subway.Logger)
 
-	if options.GinMode != "" {
-		gin.SetMode(options.GinMode)
-	}
-
-	if options.NginxAddress != "" {
-		err = subway.Route.SetTrustedProxies([]string{options.NginxAddress})
-		if err != nil {
-			return nil, fmt.Errorf("failed to set trusted proxies: %w", err)
-		}
-	}
-
-	subway.Route = subway.PrepareGin()
-
 	return subway, nil
 }
 
-// Open sets up any services and starts the webserver.
-func (subway *Subway) Open() error {
+// Listen handles starting up the webserver and services for you.
+func (subway *Subway) ListenAndServe(route, host string) error {
+	if route == "" {
+		route = "/"
+	}
+
 	subway.StartTime = time.Now().UTC()
 	subway.Logger.Info().Msgf("Starting subway Version %s", VERSION)
 
@@ -120,36 +100,33 @@ func (subway *Subway) Open() error {
 	// Setup Prometheus
 	go subway.SetupPrometheus()
 
-	subway.Logger.Info().Msgf("Serving http at %s", subway.host)
+	subway.Logger.Info().Msgf("Serving subway at %s", host)
 
-	err := subway.Route.Run(subway.host)
+	subwayMux := http.NewServeMux()
+	subwayMux.HandleFunc(route, subway.HandleSubwayRequest)
+
+	err := http.ListenAndServe(subway.prometheusAddress, subwayMux)
 	if err != nil {
-		return fmt.Errorf("failed to run gin: %w", err)
+		subway.Logger.Error().Str("host", subway.prometheusAddress).Err(err).Msg("Failed to serve subway server")
+
+		return fmt.Errorf("failed to serve subway: %w", err)
 	}
 
 	return nil
 }
 
-// Close gracefully closes the backend.
-func (subway *Subway) Close() error {
-	// TODO
+// SyncCommands syncs all registered commands with the discord API.
+// Use sandwichClient.FetchIdentifier to get the token for an identifier.
+// Token must have "Bot " added.
+func (subway *Subway) SyncCommands(context context.Context, token string, applicationID discord.Snowflake) error {
+	session := discord.NewSession(context, token, subway.RESTInterface, subway.Logger)
+
+	applicationCommands := subway.Commands.MapApplicationCommands()
+
+	_, err := discord.BulkOverwriteGlobalApplicationCommands(session, applicationID, applicationCommands)
+	if err != nil {
+		return fmt.Errorf("failed to bulk overwrite commands: %w", err)
+	}
 
 	return nil
-}
-
-// PrepareGin prepares gin routes and middleware.
-func (subway *Subway) PrepareGin() *gin.Engine {
-	router := gin.New()
-	router.TrustedPlatform = gin.PlatformCloudflare
-
-	_ = router.SetTrustedProxies(nil)
-
-	router.Use(logger.SetLogger())
-	router.Use(gzip.Gzip(gzip.DefaultCompression))
-
-	router.Use(gin.Recovery())
-
-	subway.registerRoutes(router)
-
-	return router
 }

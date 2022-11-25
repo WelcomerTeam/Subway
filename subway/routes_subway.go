@@ -1,83 +1,112 @@
 package internal
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 )
 
-func (subway *Subway) registerRoutes(g *gin.Engine) {
-	// GET / returns subway information.
-	g.GET("/", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "Subway VERSION "+VERSION)
-	})
+var InteractionPongResponse = []byte(`{"type":1}`)
 
-	// POST / handles interactions.
-	g.POST("/", func(ctx *gin.Context) {
-		verifySignature(ctx, subway.publicKey, func(ctx *gin.Context) {
-			var interaction discord.Interaction
-			start := time.Now()
+func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 
-			defer func() {
-				elapsed := float64(time.Since(start)) / float64(time.Second)
+		return
+	}
 
-				var guildID string
-				var userID string
+	start := time.Now()
 
-				if interaction.GuildID != nil {
-					guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
-				}
+	defer r.Body.Close()
 
-				if interaction.User != nil {
-					userID = strconv.FormatInt(int64(interaction.User.ID), 10)
-				}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
-				subwayInteractionProcessingTimeName.WithLabelValues(interaction.Data.Name, guildID, userID).Observe(elapsed)
-			}()
+		return
+	}
 
-			err := ctx.BindJSON(&interaction)
-			if err != nil {
-				ctx.String(http.StatusBadRequest, err.Error())
+	verified := subway.verifySignature(r, body)
+	if !verified {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 
-				return
-			}
+		return
+	}
 
-			if interaction.Type == discord.InteractionTypePing {
-				ctx.JSON(http.StatusOK, discord.InteractionResponse{
-					Type: discord.InteractionCallbackTypePong,
-					Data: nil,
-				})
+	var interaction discord.Interaction
 
-				return
-			}
+	defer func() {
+		elapsed := float64(time.Since(start)) / float64(time.Second)
 
-			response, err := subway.ProcessInteraction(interaction)
+		var guildID string
 
-			var guildID string
-			var userID string
+		var userID string
 
-			if interaction.GuildID != nil {
-				guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
-			}
+		if interaction.GuildID != nil {
+			guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
+		}
 
-			if interaction.User != nil {
-				userID = strconv.FormatInt(int64(interaction.User.ID), 10)
-			}
+		if interaction.User != nil {
+			userID = strconv.FormatInt(int64(interaction.User.ID), 10)
+		}
 
-			subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
+		subwayInteractionProcessingTimeName.WithLabelValues(interaction.Data.Name, guildID, userID).Observe(elapsed)
+	}()
 
-			if err != nil {
-				subway.Logger.Warn().Err(err).Send()
+	err = jsoniter.Unmarshal(body, &interaction)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
-				subwayFailedInteractionTotal.Add(1)
-				ctx.JSON(http.StatusInternalServerError, err.Error())
-			} else {
-				subwaySuccessfulInteractionTotal.Add(1)
-				ctx.JSON(http.StatusOK, response)
-			}
-		})
-	})
+		return
+	}
+
+	if interaction.Type == discord.InteractionTypePing {
+		w.Header().Add("Content-Type", "application/json")
+		_, _ = w.Write(InteractionPongResponse)
+
+		return
+	}
+
+	response, err := subway.ProcessInteraction(interaction)
+
+	var guildID string
+
+	var userID string
+
+	if interaction.GuildID != nil {
+		guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
+	}
+
+	if interaction.User != nil {
+		userID = strconv.FormatInt(int64(interaction.User.ID), 10)
+	}
+
+	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
+
+	if err != nil {
+		subway.Logger.Warn().Err(err).Send()
+
+		subwayFailedInteractionTotal.Add(1)
+
+		w.WriteHeader(http.StatusNoContent)
+
+		return
+	}
+
+	subwaySuccessfulInteractionTotal.Add(1)
+
+	resp, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	_, _ = w.Write(resp)
 }

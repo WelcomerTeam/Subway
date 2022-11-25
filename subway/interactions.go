@@ -39,8 +39,8 @@ type InteractionCommandable struct {
 	parent   *InteractionCommandable
 }
 
-func (ic *InteractionCommandable) MapApplicationCommands() []discord.ApplicationCommand {
-	applicationCommands := make([]discord.ApplicationCommand, 0, len(ic.commands))
+func (ic *InteractionCommandable) MapApplicationCommands() []*discord.ApplicationCommand {
+	applicationCommands := make([]*discord.ApplicationCommand, 0, len(ic.commands))
 
 	applicationCommandType := discord.ApplicationCommandTypeChatInput
 
@@ -55,7 +55,7 @@ func (ic *InteractionCommandable) MapApplicationCommands() []discord.Application
 
 		nilInt64 := (discord.Int64)(0)
 
-		applicationCommands = append(applicationCommands, discord.ApplicationCommand{
+		applicationCommands = append(applicationCommands, &discord.ApplicationCommand{
 			// ID:                0,
 			Type: applicationType,
 			// ApplicationID:     0,

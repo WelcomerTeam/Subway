@@ -33,9 +33,7 @@ func main() {
 	prometheusAddress := flag.String("prometheusAddress", os.Getenv("PROMETHEUS_ADDRESS"), "Prometheus address")
 	publicKey := flag.String("publicKey", os.Getenv("PUBLIC_KEY"), "Public key for signature validation")
 	host := flag.String("host", os.Getenv("HOST"), "Host")
-	nginxAddress := flag.String("nginxProxy", os.Getenv("NGINX_PROXY"), "NGINX Proxy Address")
 	webhookURL := flag.String("webhookURL", os.Getenv("WEBHOOK"), "Webhook to send status messages to")
-	ginMode := flag.String("ginMode", os.Getenv("GIN_MODE"), "Gin mode (release/debug/test)")
 
 	loggingLevel := flag.String("level", os.Getenv("LOGGING_LEVEL"), "Logging level")
 
@@ -124,29 +122,20 @@ func main() {
 		SandwichClient:    protobuf.NewSandwichClient(grpcConnection),
 		RESTInterface:     restInterface,
 		Logger:            logger,
-		GinMode:           *ginMode,
 		PublicKey:         *publicKey,
-		Host:              *host,
 		PrometheusAddress: *prometheusAddress,
-		NginxAddress:      *nginxAddress,
 		Webhooks:          webhook,
 	})
 	if err != nil {
 		logger.Panic().Err(err).Msg("Exception creating app")
 	}
 
-	err = app.Open()
+	err = app.ListenAndServe("", *host)
 	if err != nil {
 		logger.Warn().Err(err).Msg("Exceptions whilst starting app")
 	}
 
 	cancel()
-
-	// Close app.
-	err = app.Close()
-	if err != nil {
-		logger.Warn().Err(err).Msg("Exception whilst closing app")
-	}
 
 	err = grpcConnection.Close()
 	if err != nil {
