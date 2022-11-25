@@ -24,6 +24,9 @@ type InteractionCommandable struct {
 	Name        string
 	Description string
 
+	NameLocalizations        map[string]string
+	DescriptionLocalizations map[string]string
+
 	Type        InteractionCommandableType
 	CommandType *discord.ApplicationCommandType
 
@@ -58,9 +61,11 @@ func (ic *InteractionCommandable) MapApplicationCommands() []discord.Application
 			Type: applicationType,
 			// ApplicationID:     0,
 			// GuildID:           0,
-			Name:        interactionCommandable.Name,
-			Description: interactionCommandable.Description,
-			Options:     interactionCommandable.MapApplicationOptions(),
+			Name:                     interactionCommandable.Name,
+			Description:              interactionCommandable.Description,
+			NameLocalizations:        interactionCommandable.NameLocalizations,
+			DescriptionLocalizations: interactionCommandable.DescriptionLocalizations,
+			Options:                  interactionCommandable.MapApplicationOptions(),
 			// DefaultPermission: true,
 			Version: &nilInt64,
 		})
@@ -86,9 +91,11 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		}
 
 		applicationOptions = append(applicationOptions, &discord.ApplicationCommandOption{
-			Type:        applicationOptionType,
-			Name:        command.Name,
-			Description: command.Description,
+			Type:                     applicationOptionType,
+			Name:                     command.Name,
+			Description:              command.Description,
+			NameLocalizations:        command.NameLocalizations,
+			DescriptionLocalizations: command.DescriptionLocalizations,
 			// Required:     false,
 			// Choices:      []*discord.ApplicationCommandOptionChoice{},
 			Options: command.MapApplicationOptions(),
@@ -134,7 +141,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			applicationOptionType = discord.ApplicationCommandOptionTypeString
 		case ArgumentTypeRole:
 			applicationOptionType = discord.ApplicationCommandOptionTypeRole
-		case ArgumentTypeColour, ArgumentTypeEmoji, ArgumentTypePartialEmoji, ArgumentTypeString, ArgumentTypeFill:
+		case ArgumentTypeColour, ArgumentTypeEmoji, ArgumentTypePartialEmoji, ArgumentTypeString:
 			applicationOptionType = discord.ApplicationCommandOptionTypeString
 		case ArgumentTypeBool:
 			applicationOptionType = discord.ApplicationCommandOptionTypeBoolean
@@ -145,10 +152,12 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		}
 
 		commandOption := &discord.ApplicationCommandOption{
-			Type:        applicationOptionType,
-			Name:        argument.Name,
-			Description: argument.Description,
-			Required:    argument.Required,
+			Type:                     applicationOptionType,
+			Name:                     argument.Name,
+			Description:              argument.Description,
+			NameLocalizations:        argument.NameLocalizations,
+			DescriptionLocalizations: argument.DescriptionLocalizations,
+			Required:                 argument.Required,
 			// Choices:      []*discord.ApplicationCommandOptionChoice{},
 			// Options:      applicationOptions,
 			// MinValue:     0,
@@ -431,7 +440,7 @@ type InteractionContext struct {
 }
 
 // NewInteractionContext creates a new interaction context.
-func NewInteractionContext(subway *Subway, interaction *discord.Interaction) (interactionContext *InteractionContext) {
+func NewInteractionContext(subway *Subway, interaction *discord.Interaction) *InteractionContext {
 	return &InteractionContext{
 		Subway:             subway,
 		Interaction:        interaction,
@@ -452,7 +461,7 @@ func (interactionContext *InteractionContext) ToGRPCContext() *sandwich.GRPCCont
 type InteractionHandler func(ctx *InteractionContext) (resp *discord.InteractionResponse, err error)
 
 // MustGetArgument returns an argument based on its name. Panics on error.
-func (interactionContext *InteractionContext) MustGetArgument(name string) (a *Argument) {
+func (interactionContext *InteractionContext) MustGetArgument(name string) *Argument {
 	arg, err := interactionContext.GetArgument(name)
 	if err != nil {
 		panic(fmt.Sprintf(`ctx: GetArgument(%s): %v`, name, err.Error()))
@@ -462,7 +471,7 @@ func (interactionContext *InteractionContext) MustGetArgument(name string) (a *A
 }
 
 // GetArgument returns an argument based on its name.
-func (interactionContext *InteractionContext) GetArgument(name string) (arg *Argument, err error) {
+func (interactionContext *InteractionContext) GetArgument(name string) (*Argument, error) {
 	arg, ok := interactionContext.Arguments[name]
 	if !ok {
 		return nil, ErrArgumentNotFound
@@ -473,6 +482,10 @@ func (interactionContext *InteractionContext) GetArgument(name string) (arg *Arg
 
 // SetupInteractionCommandable ensures all nullable variables are properly constructed.
 func SetupInteractionCommandable(commandable *InteractionCommandable) *InteractionCommandable {
+	if commandable == nil {
+		commandable = &InteractionCommandable{}
+	}
+
 	if commandable.commands == nil {
 		commandable.commands = make(map[string]*InteractionCommandable)
 	}

@@ -69,8 +69,8 @@ type SubwayOptions struct {
 	Webhooks []string
 }
 
-func NewSubway(options SubwayOptions) (s *Subway, err error) {
-	s = &Subway{
+func NewSubway(options SubwayOptions) (*Subway, error) {
+	subway := &Subway{
 		Logger: options.Logger,
 
 		RESTInterface:  options.RESTInterface,
@@ -81,36 +81,38 @@ func NewSubway(options SubwayOptions) (s *Subway, err error) {
 		prometheusAddress: options.PrometheusAddress,
 		nginxAddress:      options.NginxAddress,
 
-		Commands:   SetupInteractionCommandable(&InteractionCommandable{}),
+		Commands:   SetupInteractionCommandable(nil),
 		Converters: NewInteractionConverters(),
 
 		Cogs: make(map[string]Cog),
 	}
 
-	s.publicKey, err = hex.DecodeString(options.PublicKey)
+	var err error
+
+	subway.publicKey, err = hex.DecodeString(options.PublicKey)
 	if err != nil {
 		return nil, ErrInvalidPublicKey
 	}
 
-	s.ctx, s.cancel = context.WithCancel(context.Background())
+	subway.ctx, subway.cancel = context.WithCancel(context.Background())
 
 	// Setup sessions
-	s.EmptySession = discord.NewSession(s.ctx, "", s.RESTInterface, s.Logger)
+	subway.EmptySession = discord.NewSession(subway.ctx, "", subway.RESTInterface, subway.Logger)
 
 	if options.GinMode != "" {
 		gin.SetMode(options.GinMode)
 	}
 
 	if options.NginxAddress != "" {
-		err = s.Route.SetTrustedProxies([]string{options.NginxAddress})
+		err = subway.Route.SetTrustedProxies([]string{options.NginxAddress})
 		if err != nil {
 			return nil, fmt.Errorf("failed to set trusted proxies: %w", err)
 		}
 	}
 
-	s.Route = s.PrepareGin()
+	subway.Route = subway.PrepareGin()
 
-	return s, nil
+	return subway, nil
 }
 
 // Open sets up any services and starts the webserver.

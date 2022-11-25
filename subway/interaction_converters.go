@@ -24,10 +24,12 @@ var (
 )
 
 type ArgumentParameter struct {
-	Required     bool
-	ArgumentType ArgumentType
-	Name         string
-	Description  string
+	Required                 bool
+	ArgumentType             ArgumentType
+	Name                     string
+	Description              string
+	NameLocalizations        map[string]string
+	DescriptionLocalizations map[string]string
 }
 
 type Argument struct {
@@ -441,7 +443,6 @@ func NewInteractionConverters() *InteractionConverters {
 	converters.RegisterConverter(ArgumentTypeBool, HandleInteractionArgumentTypeBool, false)
 	converters.RegisterConverter(ArgumentTypeInt, HandleInteractionArgumentTypeInt, int64(0))
 	converters.RegisterConverter(ArgumentTypeFloat, HandleInteractionArgumentTypeFloat, float64(0))
-	converters.RegisterConverter(ArgumentTypeFill, HandleInteractionArgumentTypeString, "")
 
 	return converters
 }

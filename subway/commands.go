@@ -25,5 +25,4 @@ const (
 	ArgumentTypeBool
 	ArgumentTypeInt
 	ArgumentTypeFloat
-	ArgumentTypeFill
 )
