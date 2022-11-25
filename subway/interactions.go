@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"runtime/debug"
 	"strings"
 
 	"github.com/WelcomerTeam/Discord/discord"
@@ -325,8 +324,7 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.Inte
 		if errorValue != nil {
 			ctx.Subway.Logger.Error().Interface("errorValue", errorValue).Msg("Recovered panic on event dispatch")
 
-			// TODO: Add global panic handler.
-			fmt.Println(string(debug.Stack()))
+			ic.propagateError(ctx, PanicError{errorValue})
 		}
 	}()
 
@@ -334,14 +332,36 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.Inte
 
 	if ic.Handler != nil {
 		resp, err = ic.Handler(ctx)
-
-		// TODO: Add error handler.
 		if err != nil {
-			return nil, err
+			return ic.propagateError(ctx, err), err
 		}
+	} else {
+		return ic.propagateError(ctx, ErrCommandNotFound), ErrCommandNotFound
 	}
 
 	return resp, nil
+}
+
+// propagateError propagates an error to the current command or parent. It will execute the root parent first,
+// then go up from there. It will return the highest up error handler in the chain that returns a interaction response.
+// If the command and root error handler returns an interaction response, the command error handler response will be
+// returned. If the root returns an interaction response and the command does not, the root response is returned.
+func (ic *InteractionCommandable) propagateError(ctx *InteractionContext, err error) (interactionResponse *discord.InteractionResponse) {
+	if ic.parent != nil {
+		rootInteractionResponse := ic.parent.propagateError(ctx, err)
+		if rootInteractionResponse != nil {
+			interactionResponse = rootInteractionResponse
+		}
+	}
+
+	if ic.ErrorHandler != nil {
+		commandInteractionResponse, _ := ic.ErrorHandler(ctx)
+		if commandInteractionResponse != nil {
+			interactionResponse = commandInteractionResponse
+		}
+	}
+
+	return interactionResponse
 }
 
 // CanRun checks interactionCommandable checks and returns if the interaction passes them all.

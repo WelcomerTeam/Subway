@@ -18,7 +18,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.0.1"
+const VERSION = "0.1"
 
 const (
 	PermissionsDefault = 0o744
@@ -26,9 +26,6 @@ const (
 )
 
 type Subway struct {
-	ctx    context.Context
-	cancel func()
-
 	Logger    zerolog.Logger `json:"-"`
 	StartTime time.Time      `json:"start_time" yaml:"start_time"`
 
@@ -69,7 +66,7 @@ type SubwayOptions struct {
 	Webhooks []string
 }
 
-func NewSubway(options SubwayOptions) (*Subway, error) {
+func NewSubway(context context.Context, options SubwayOptions) (*Subway, error) {
 	subway := &Subway{
 		Logger: options.Logger,
 
@@ -94,10 +91,8 @@ func NewSubway(options SubwayOptions) (*Subway, error) {
 		return nil, ErrInvalidPublicKey
 	}
 
-	subway.ctx, subway.cancel = context.WithCancel(context.Background())
-
 	// Setup sessions
-	subway.EmptySession = discord.NewSession(subway.ctx, "", subway.RESTInterface, subway.Logger)
+	subway.EmptySession = discord.NewSession(context, "", subway.RESTInterface, subway.Logger)
 
 	if options.GinMode != "" {
 		gin.SetMode(options.GinMode)

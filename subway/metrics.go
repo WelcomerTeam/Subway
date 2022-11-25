@@ -19,23 +19,23 @@ var (
 
 	subwayInteractionTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "subway_interaction_count",
-			Help: "Count of total interactions received",
+			Name: "subway_interaction_total",
+			Help: "Total interactions received",
 		},
 		[]string{"name", "guild_id", "user_id"},
 	)
 
 	subwaySuccessfulInteractionTotal = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "subway_successful_interaction_count",
-			Help: "Count of successful interactions received",
+			Name: "subway_successful_interaction_total",
+			Help: "Total successful interactions received",
 		},
 	)
 
 	subwayFailedInteractionTotal = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "subway_failed_interaction_count",
-			Help: "Count of failed interactions received",
+			Name: "subway_failed_interaction_total",
+			Help: "Total failed interactions received",
 		},
 	)
 )

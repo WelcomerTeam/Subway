@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -116,8 +117,10 @@ func main() {
 		webhook = []string{*webhookURL}
 	}
 
+	context, cancel := context.WithCancel(context.Background())
+
 	// Setup app.
-	app, err := subway.NewSubway(subway.SubwayOptions{
+	app, err := subway.NewSubway(context, subway.SubwayOptions{
 		SandwichClient:    protobuf.NewSandwichClient(grpcConnection),
 		RESTInterface:     restInterface,
 		Logger:            logger,
@@ -136,6 +139,8 @@ func main() {
 	if err != nil {
 		logger.Warn().Err(err).Msg("Exceptions whilst starting app")
 	}
+
+	cancel()
 
 	// Close app.
 	err = app.Close()

@@ -1,6 +1,9 @@
 package internal
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	ErrSubwayAlreadyExists = errors.New("subway already created")
@@ -40,3 +43,11 @@ var (
 	ErrBadFloatArgument   = errors.New("float provided was not in valid format")
 	ErrBadWebhookArgument = errors.New("webhook url provided was not in valid format")
 )
+
+type PanicError struct {
+	Recover interface{}
+}
+
+func (cp PanicError) Error() string {
+	return fmt.Sprintf("command panicked with error: %v", cp.Recover)
+}
