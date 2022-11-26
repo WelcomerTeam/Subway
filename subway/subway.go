@@ -105,7 +105,7 @@ func (subway *Subway) ListenAndServe(route, host string) error {
 	subwayMux := http.NewServeMux()
 	subwayMux.HandleFunc(route, subway.HandleSubwayRequest)
 
-	err := http.ListenAndServe(subway.prometheusAddress, subwayMux)
+	err := http.ListenAndServe(host, subwayMux)
 	if err != nil {
 		subway.Logger.Error().Str("host", subway.prometheusAddress).Err(err).Msg("Failed to serve subway server")
 
