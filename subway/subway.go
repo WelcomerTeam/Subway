@@ -57,7 +57,7 @@ type SubwayOptions struct {
 	Webhooks []string
 }
 
-func NewSubway(context context.Context, options SubwayOptions) (*Subway, error) {
+func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	subway := &Subway{
 		Logger: options.Logger,
 
@@ -81,7 +81,7 @@ func NewSubway(context context.Context, options SubwayOptions) (*Subway, error) 
 	}
 
 	// Setup sessions
-	subway.EmptySession = discord.NewSession(context, "", subway.RESTInterface, subway.Logger)
+	subway.EmptySession = discord.NewSession(ctx, "", subway.RESTInterface, subway.Logger)
 
 	return subway, nil
 }
@@ -118,8 +118,8 @@ func (subway *Subway) ListenAndServe(route, host string) error {
 // SyncCommands syncs all registered commands with the discord API.
 // Use sandwichClient.FetchIdentifier to get the token for an identifier.
 // Token must have "Bot " added.
-func (subway *Subway) SyncCommands(context context.Context, token string, applicationID discord.Snowflake) error {
-	session := discord.NewSession(context, token, subway.RESTInterface, subway.Logger)
+func (subway *Subway) SyncCommands(ctx context.Context, token string, applicationID discord.Snowflake) error {
+	session := discord.NewSession(ctx, token, subway.RESTInterface, subway.Logger)
 
 	applicationCommands := subway.Commands.MapApplicationCommands()
 
