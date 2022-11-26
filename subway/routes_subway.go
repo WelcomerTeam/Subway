@@ -26,6 +26,8 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		subway.Logger.Warn().Err(err).Msg("Failed to read body")
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
 		return
@@ -33,6 +35,8 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	verified := subway.verifySignature(r, body)
 	if !verified {
+		subway.Logger.Warn().Msg("Sender passed invalid signature")
+
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 
 		return
@@ -43,9 +47,13 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 	defer func() {
 		elapsed := float64(time.Since(start)) / float64(time.Second)
 
+		var commandName string
 		var guildID string
-
 		var userID string
+
+		if interaction.Data != nil {
+			commandName = interaction.Data.Name
+		}
 
 		if interaction.GuildID != nil {
 			guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
@@ -55,11 +63,13 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 			userID = strconv.FormatInt(int64(interaction.User.ID), 10)
 		}
 
-		subwayInteractionProcessingTimeName.WithLabelValues(interaction.Data.Name, guildID, userID).Observe(elapsed)
+		subwayInteractionProcessingTimeName.WithLabelValues(commandName, guildID, userID).Observe(elapsed)
 	}()
 
 	err = jsoniter.Unmarshal(body, &interaction)
 	if err != nil {
+		subway.Logger.Warn().Err(err).Msg("Failed to parse interaction")
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
 		return
