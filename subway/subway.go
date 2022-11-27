@@ -37,6 +37,9 @@ type Subway struct {
 	RESTInterface  discord.RESTInterface   `json:"-"`
 	EmptySession   *discord.Session        `json:"-"`
 
+	OnBeforeInteraction InteractionRequestHandler
+	OnAfterInteraction  InteractionResponseHandler
+
 	// Environment Variables.
 	publicKey         ed25519.PublicKey
 	prometheusAddress string
@@ -50,8 +53,10 @@ type SubwayOptions struct {
 	RESTInterface  discord.RESTInterface
 	Logger         zerolog.Logger
 
-	PublicKey string
+	OnBeforeInteraction InteractionRequestHandler
+	OnAfterInteraction  InteractionResponseHandler
 
+	PublicKey         string
 	PrometheusAddress string
 
 	Webhooks []string
@@ -65,12 +70,17 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 		SandwichClient: options.SandwichClient,
 		GRPCInterface:  sandwich.NewDefaultGRPCClient(),
 
+		OnBeforeInteraction: options.OnBeforeInteraction,
+		OnAfterInteraction:  options.OnAfterInteraction,
+
 		prometheusAddress: options.PrometheusAddress,
 
 		Commands:   SetupInteractionCommandable(nil),
 		Converters: NewInteractionConverters(),
 
 		Cogs: make(map[string]Cog),
+
+		webhooks: options.Webhooks,
 	}
 
 	var err error

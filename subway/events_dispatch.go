@@ -10,14 +10,30 @@ import (
 func (subway *Subway) ProcessInteraction(interaction discord.Interaction) (*discord.InteractionResponse, error) {
 	interactionCtx, err := subway.GetInteractionContext(interaction)
 	if err != nil {
-		return nil, err
+		return subway.Commands.propagateError(interactionCtx, ErrCommandNotFound), ErrCommandNotFound
 	}
 
 	if interactionCtx.InteractionCommand == nil {
-		return nil, ErrCommandNotFound
+		return subway.Commands.propagateError(interactionCtx, ErrCommandNotFound), ErrCommandNotFound
 	}
 
-	return interactionCtx.Invoke()
+	if subway.OnBeforeInteraction != nil {
+		err = subway.OnBeforeInteraction(interactionCtx)
+		if err != nil {
+			return subway.Commands.propagateError(interactionCtx, err), err
+		}
+	}
+
+	response, err := interactionCtx.Invoke()
+
+	if subway.OnAfterInteraction != nil {
+		err = subway.OnAfterInteraction(interactionCtx, response, err)
+		if err != nil {
+			return subway.Commands.propagateError(interactionCtx, err), err
+		}
+	}
+
+	return response, nil
 }
 
 // GetInteractionContext returns the interaction context from an interaction.

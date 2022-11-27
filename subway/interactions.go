@@ -33,7 +33,7 @@ type InteractionCommandable struct {
 	ArgumentParameter []ArgumentParameter
 
 	Handler      InteractionHandler
-	ErrorHandler InteractionHandler
+	ErrorHandler InteractionErrorHandler
 
 	commands map[string]*InteractionCommandable
 	parent   *InteractionCommandable
@@ -355,7 +355,7 @@ func (ic *InteractionCommandable) propagateError(ctx *InteractionContext, err er
 	}
 
 	if ic.ErrorHandler != nil {
-		commandInteractionResponse, _ := ic.ErrorHandler(ctx)
+		commandInteractionResponse, _ := ic.ErrorHandler(ctx, err)
 		if commandInteractionResponse != nil {
 			interactionResponse = commandInteractionResponse
 		}
@@ -478,7 +478,11 @@ func (interactionContext *InteractionContext) ToGRPCContext() *sandwich.GRPCCont
 	return &sandwich.GRPCContext{}
 }
 
-type InteractionHandler func(ctx *InteractionContext) (resp *discord.InteractionResponse, err error)
+type InteractionHandler func(ctx *InteractionContext) (*discord.InteractionResponse, error)
+type InteractionErrorHandler func(ctx *InteractionContext, err error) (*discord.InteractionResponse, error)
+
+type InteractionRequestHandler func(ctx *InteractionContext) error
+type InteractionResponseHandler func(ctx *InteractionContext, resp *discord.InteractionResponse, err error) error
 
 // MustGetArgument returns an argument based on its name. Panics on error.
 func (interactionContext *InteractionContext) MustGetArgument(name string) *Argument {
