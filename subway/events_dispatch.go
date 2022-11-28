@@ -1,54 +1,46 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
 )
 
 // ProcessInteraction processes the interaction that has been registered to the bot.
-func (subway *Subway) ProcessInteraction(interaction discord.Interaction) (*discord.InteractionResponse, error) {
-	interactionCtx, err := subway.GetInteractionContext(interaction)
-	if err != nil {
-		return subway.Commands.propagateError(interactionCtx, ErrCommandNotFound), ErrCommandNotFound
-	}
+func (subway *Subway) ProcessInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
+	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
+	command := subway.Commands.GetCommand(interaction.Data.Name)
 
-	if interactionCtx.InteractionCommand == nil {
-		return subway.Commands.propagateError(interactionCtx, ErrCommandNotFound), ErrCommandNotFound
+	// Create interaction context
+	interactionContext := AddInteractionToContext(ctx, &interaction)
+	interactionContext = AddInteractionCommandToContext(interactionContext, command)
+	interactionContext = AddArgumentsToContext(interactionContext, make(map[string]*Argument))
+	interactionContext = AddRawOptionsToContext(interactionContext, extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)))
+	interactionContext = AddCommandBranchToContext(interactionContext, commandTree)
+	interactionContext = AddCommandTreeToContext(interactionContext, commandTree)
+
+	if command == nil {
+		return subway.Commands.propagateError(interactionContext, ErrCommandNotFound), ErrCommandNotFound
 	}
 
 	if subway.OnBeforeInteraction != nil {
-		err = subway.OnBeforeInteraction(interactionCtx)
+		err := subway.OnBeforeInteraction(interactionContext)
 		if err != nil {
-			return subway.Commands.propagateError(interactionCtx, err), err
+			return subway.Commands.propagateError(interactionContext, err), err
 		}
 	}
 
-	response, err := interactionCtx.Invoke()
+	response, err := command.Invoke(ctx)
 
 	if subway.OnAfterInteraction != nil {
-		err = subway.OnAfterInteraction(interactionCtx, response, err)
+		err = subway.OnAfterInteraction(interactionContext, response, err)
 		if err != nil {
-			return subway.Commands.propagateError(interactionCtx, err), err
+			return subway.Commands.propagateError(interactionContext, err), err
 		}
 	}
 
 	return response, nil
-}
-
-// GetInteractionContext returns the interaction context from an interaction.
-func (subway *Subway) GetInteractionContext(interaction discord.Interaction) (*InteractionContext, error) {
-	interactionContext := NewInteractionContext(subway, &interaction)
-
-	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
-
-	command := subway.Commands.GetCommand(interaction.Data.Name)
-
-	interactionContext.InteractionCommand = command
-	interactionContext.commandBranch = commandTree
-	interactionContext.CommandTree = commandTree
-
-	return interactionContext, nil
 }
 
 func constructCommandTree(options []*discord.InteractionDataOption, tree []string) []string {
@@ -69,7 +61,7 @@ func constructCommandTree(options []*discord.InteractionDataOption, tree []strin
 
 // CanRun checks all global bot checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
-func (subway *Subway) CanRun(ctx *InteractionContext) (bool, error) {
+func (subway *Subway) CanRun(ctx context.Context) (bool, error) {
 	for _, check := range subway.Commands.Checks {
 		canRun, err := check(ctx)
 		if err != nil {

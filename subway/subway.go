@@ -24,6 +24,8 @@ const (
 )
 
 type Subway struct {
+	context.Context
+
 	Logger    zerolog.Logger `json:"-"`
 	StartTime time.Time      `json:"start_time" yaml:"start_time"`
 
@@ -64,6 +66,8 @@ type SubwayOptions struct {
 
 func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	subway := &Subway{
+		Context: ctx,
+
 		Logger: options.Logger,
 
 		RESTInterface:  options.RESTInterface,
@@ -121,6 +125,8 @@ func (subway *Subway) ListenAndServe(route, host string) error {
 
 		return fmt.Errorf("failed to serve subway: %w", err)
 	}
+
+	println("D")
 
 	return nil
 }

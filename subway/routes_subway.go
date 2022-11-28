@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/WelcomerTeam/Discord/discord"
+	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -82,7 +84,10 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	response, err := subway.ProcessInteraction(interaction)
+	response, err := subway.ProcessInteraction(
+		subway.NewInteractionContext(subway.Context),
+		interaction,
+	)
 
 	var guildID string
 
@@ -119,4 +124,17 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	w.Header().Add("Content-Type", "application/json")
 	_, _ = w.Write(resp)
+}
+
+func (subway *Subway) NewInteractionContext(ctx context.Context) context.Context {
+	return AddSubwayToContext(ctx, subway)
+}
+
+func (subway *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {
+	return &sandwich.GRPCContext{
+		Context:        ctx,
+		Logger:         subway.Logger,
+		SandwichClient: subway.SandwichClient,
+		GRPCInterface:  subway.GRPCInterface,
+	}
 }

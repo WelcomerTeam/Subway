@@ -1,15 +1,15 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 )
 
 // Func Type used for command checks.
-type InteractionCheckFuncType func(interactionCtx *InteractionContext) (canRun bool, err error)
+type InteractionCheckFuncType func(ctx context.Context) (canRun bool, err error)
 
 type InteractionCommandableType uint8
 
@@ -293,11 +293,16 @@ func (ic *InteractionCommandable) IsGroup() bool {
 }
 
 // Invoke handles the execution of a command or a group.
-func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.InteractionResponse, error) {
-	if len(ctx.CommandTree) > 0 {
+func (ic *InteractionCommandable) Invoke(ctx context.Context) (*discord.InteractionResponse, error) {
+	commandTree := GetCommandTreeFromContext(ctx)
+	commandBranch := GetCommandBranchFromContext(ctx)
+
+	subway := GetSubwayFromContext(ctx)
+
+	if len(commandTree) > 0 {
 		if ic.IsGroup() {
-			branch := ctx.commandBranch[0]
-			ctx.commandBranch = ctx.commandBranch[1:]
+			branch := commandBranch[0]
+			commandContext := AddCommandBranchToContext(ctx, commandBranch[1:])
 
 			commandable := ic.GetCommand(branch)
 
@@ -305,12 +310,12 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.Inte
 				return nil, ErrCommandNotFound
 			}
 
-			return commandable.Invoke(ctx)
+			return commandable.Invoke(commandContext)
 		}
 
-		ctx.Subway.Logger.Warn().
+		subway.Logger.Warn().
 			Str("command", ic.Name).
-			Str("branch", ctx.commandBranch[0]).
+			Str("branch", commandBranch[0]).
 			Msg("Encountered non-group whilst traversing command tree.")
 	}
 
@@ -322,7 +327,7 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.Inte
 	defer func() {
 		errorValue := recover()
 		if errorValue != nil {
-			ctx.Subway.Logger.Error().Interface("errorValue", errorValue).Msg("Recovered panic on event dispatch")
+			subway.Logger.Error().Interface("errorValue", errorValue).Msg("Recovered panic on event dispatch")
 
 			ic.propagateError(ctx, PanicError{errorValue})
 		}
@@ -346,7 +351,7 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (*discord.Inte
 // then go up from there. It will return the highest up error handler in the chain that returns a interaction response.
 // If the command and root error handler returns an interaction response, the command error handler response will be
 // returned. If the root returns an interaction response and the command does not, the root response is returned.
-func (ic *InteractionCommandable) propagateError(ctx *InteractionContext, err error) (interactionResponse *discord.InteractionResponse) {
+func (ic *InteractionCommandable) propagateError(ctx context.Context, err error) (interactionResponse *discord.InteractionResponse) {
 	if ic.parent != nil {
 		rootInteractionResponse := ic.parent.propagateError(ctx, err)
 		if rootInteractionResponse != nil {
@@ -366,7 +371,7 @@ func (ic *InteractionCommandable) propagateError(ctx *InteractionContext, err er
 
 // CanRun checks interactionCommandable checks and returns if the interaction passes them all.
 // If an error occurs, the message will be treated as not being able to run.
-func (ic *InteractionCommandable) CanRun(ctx *InteractionContext) (bool, error) {
+func (ic *InteractionCommandable) CanRun(ctx context.Context) (bool, error) {
 	for _, check := range ic.Checks {
 		canRun, err := check(ctx)
 		if err != nil {
@@ -381,10 +386,8 @@ func (ic *InteractionCommandable) CanRun(ctx *InteractionContext) (bool, error) 
 	return true, nil
 }
 
-func (ic *InteractionCommandable) prepare(ctx *InteractionContext) error {
-	ctx.InteractionCommand = ic
-
-	ok, err := ic.CanRun(ctx)
+func (ic *InteractionCommandable) prepare(interactionContext context.Context) error {
+	ok, err := ic.CanRun(interactionContext)
 
 	switch {
 	case !ok:
@@ -393,7 +396,7 @@ func (ic *InteractionCommandable) prepare(ctx *InteractionContext) error {
 		return err
 	}
 
-	err = ic.parseArguments(ctx)
+	interactionContext, err = ic.parseArguments(interactionContext)
 	if err != nil {
 		return err
 	}
@@ -402,35 +405,35 @@ func (ic *InteractionCommandable) prepare(ctx *InteractionContext) error {
 }
 
 // parseArgynebts generates the arguments for a command.
-func (ic *InteractionCommandable) parseArguments(ctx *InteractionContext) error {
-	ctx.Arguments = map[string]*Argument{}
+func (ic *InteractionCommandable) parseArguments(ctx context.Context) (context.Context, error) {
+	arguments := map[string]*Argument{}
 
 	for _, argumentParameter := range ic.ArgumentParameter {
-		parameter := argumentParameter
-		ctx.currentParameter = &parameter
-
 		transformed, err := ic.transform(ctx, argumentParameter)
 		if err != nil {
-			return err
+			return ctx, err
 		}
 
-		ctx.Arguments[argumentParameter.Name] = &Argument{
+		arguments[argumentParameter.Name] = &Argument{
 			ArgumentType: argumentParameter.ArgumentType,
 			value:        transformed,
 		}
 	}
 
-	return nil
+	interactionContext := AddArgumentsToContext(ctx, arguments)
+
+	return interactionContext, nil
 }
 
 // transform returns a output value based on the argument parameter passed in.
-func (ic *InteractionCommandable) transform(ctx *InteractionContext, argumentParameter ArgumentParameter) (out interface{}, err error) {
-	converter := ctx.Subway.Converters.GetConverter(argumentParameter.ArgumentType)
+func (ic *InteractionCommandable) transform(ctx context.Context, argumentParameter ArgumentParameter) (out interface{}, err error) {
+	converter := GetSubwayFromContext(ctx).Converters.GetConverter(argumentParameter.ArgumentType)
 	if converter == nil {
 		return nil, ErrConverterNotFound
 	}
 
-	rawOption, ok := ctx.RawOptions[argumentParameter.Name]
+	rawOptions := GetRawOptionsFromContext(ctx)
+	rawOption, ok := rawOptions[argumentParameter.Name]
 	if !ok || rawOption == nil {
 		if argumentParameter.Required {
 			return nil, ErrMissingRequiredArgument
@@ -442,51 +445,15 @@ func (ic *InteractionCommandable) transform(ctx *InteractionContext, argumentPar
 	return converter.converterType(ctx, rawOption)
 }
 
-type InteractionContext struct {
-	Subway *Subway
+type InteractionHandler func(ctx context.Context) (*discord.InteractionResponse, error)
+type InteractionErrorHandler func(ctx context.Context, err error) (*discord.InteractionResponse, error)
 
-	*discord.Interaction
-
-	commandBranch []string
-	CommandTree   []string
-
-	InteractionCommand *InteractionCommandable
-
-	currentParameter *ArgumentParameter
-
-	RawOptions map[string]*discord.InteractionDataOption
-
-	Arguments map[string]*Argument
-}
-
-// NewInteractionContext creates a new interaction context.
-func NewInteractionContext(subway *Subway, interaction *discord.Interaction) *InteractionContext {
-	return &InteractionContext{
-		Subway:             subway,
-		Interaction:        interaction,
-		InteractionCommand: nil,
-		RawOptions:         extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)),
-		Arguments:          make(map[string]*Argument),
-	}
-}
-
-func (interactionContext *InteractionContext) Invoke() (*discord.InteractionResponse, error) {
-	return interactionContext.InteractionCommand.Invoke(interactionContext)
-}
-
-func (interactionContext *InteractionContext) ToGRPCContext() *sandwich.GRPCContext {
-	return &sandwich.GRPCContext{}
-}
-
-type InteractionHandler func(ctx *InteractionContext) (*discord.InteractionResponse, error)
-type InteractionErrorHandler func(ctx *InteractionContext, err error) (*discord.InteractionResponse, error)
-
-type InteractionRequestHandler func(ctx *InteractionContext) error
-type InteractionResponseHandler func(ctx *InteractionContext, resp *discord.InteractionResponse, err error) error
+type InteractionRequestHandler func(ctx context.Context) error
+type InteractionResponseHandler func(ctx context.Context, resp *discord.InteractionResponse, err error) error
 
 // MustGetArgument returns an argument based on its name. Panics on error.
-func (interactionContext *InteractionContext) MustGetArgument(name string) *Argument {
-	arg, err := interactionContext.GetArgument(name)
+func MustGetArgument(ctx context.Context, name string) *Argument {
+	arg, err := GetArgument(ctx, name)
 	if err != nil {
 		panic(fmt.Sprintf(`ctx: GetArgument(%s): %v`, name, err.Error()))
 	}
@@ -495,8 +462,9 @@ func (interactionContext *InteractionContext) MustGetArgument(name string) *Argu
 }
 
 // GetArgument returns an argument based on its name.
-func (interactionContext *InteractionContext) GetArgument(name string) (*Argument, error) {
-	arg, ok := interactionContext.Arguments[name]
+func GetArgument(ctx context.Context, name string) (*Argument, error) {
+	arguments := GetArgumentsFromContext(ctx)
+	arg, ok := arguments[name]
 	if !ok {
 		return nil, ErrArgumentNotFound
 	}
