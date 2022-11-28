@@ -6,17 +6,17 @@ import (
 	"github.com/WelcomerTeam/Discord/discord"
 )
 
-type SubwayContextKey string
+type SubwayContextKey int
 
-var (
-	SubwayKey             SubwayContextKey = "subway.Subway"
-	InteractionKey        SubwayContextKey = "subway.Interaction"
-	InteractionCommandKey SubwayContextKey = "subway.InteractionCommand"
-	ArgumentsKey          SubwayContextKey = "subway.Arguments"
-	RawOptionsKey         SubwayContextKey = "subway.RawOptions"
-	CommandBranchKey      SubwayContextKey = "subway.CommandBranch"
-	CommandTreeKey        SubwayContextKey = "subway.CommandTree"
-	IdentifierKey         SubwayContextKey = "subway.Identifier"
+const (
+	SubwayKey SubwayContextKey = iota
+	InteractionKey
+	InteractionCommandKey
+	ArgumentsKey
+	RawOptionsKey
+	CommandBranchKey
+	CommandTreeKey
+	IdentifierKey
 )
 
 // Subway context handler.
