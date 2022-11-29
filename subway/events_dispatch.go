@@ -30,7 +30,7 @@ func (subway *Subway) ProcessInteraction(ctx context.Context, interaction discor
 		}
 	}
 
-	response, err := command.Invoke(ctx, subway, interaction)
+	response, err := command.Invoke(interactionContext, subway, interaction)
 
 	if subway.OnAfterInteraction != nil {
 		err = subway.OnAfterInteraction(interactionContext, subway, interaction, response, err)
