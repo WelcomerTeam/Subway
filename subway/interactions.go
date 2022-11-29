@@ -368,9 +368,23 @@ func (ic *InteractionCommandable) propagateError(ctx context.Context, subway *Su
 		if commandInteractionResponse != nil {
 			interactionResponse = commandInteractionResponse
 		}
+	} else if ic.parent == nil {
+		// If parent is nil we can assume we are the root. If an error
+		// handler is not provided, we will just use defaultErrorPropagator.
+		commandInteractionResponse, _ := defaultErrorPropagator(ctx, subway, interaction, err)
+		if commandInteractionResponse != nil {
+			interactionResponse = commandInteractionResponse
+		}
 	}
 
 	return interactionResponse
+}
+
+// Default error propagator. This will just log an exception.
+func defaultErrorPropagator(ctx context.Context, subway *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error) {
+	subway.Logger.Error().Err(err).Msg("Exception executing interaction")
+
+	return nil, err
 }
 
 // CanRun checks interactionCommandable checks and returns if the interaction passes them all.
