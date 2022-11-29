@@ -19,24 +19,6 @@ const (
 	IdentifierKey
 )
 
-// Subway context handler.
-func AddSubwayToContext(ctx context.Context, v *Subway) context.Context {
-	return context.WithValue(ctx, SubwayKey, v)
-}
-
-func GetSubwayFromContext(ctx context.Context) *Subway {
-	return ctx.Value(SubwayKey).(*Subway)
-}
-
-// Interaction context handler.
-func AddInteractionToContext(ctx context.Context, v *discord.Interaction) context.Context {
-	return context.WithValue(ctx, InteractionKey, v)
-}
-
-func GetInteractionFromContext(ctx context.Context) *discord.Interaction {
-	return ctx.Value(InteractionKey).(*discord.Interaction)
-}
-
 // InteractionCommand context handler.
 func AddInteractionCommandToContext(ctx context.Context, v *InteractionCommandable) context.Context {
 	return context.WithValue(ctx, InteractionCommandKey, v)

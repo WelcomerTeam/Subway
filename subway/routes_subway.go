@@ -84,10 +84,7 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	response, err := subway.ProcessInteraction(
-		subway.NewInteractionContext(subway.Context),
-		interaction,
-	)
+	response, err := subway.ProcessInteraction(subway.Context, interaction)
 
 	var guildID string
 
@@ -124,10 +121,6 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	w.Header().Add("Content-Type", "application/json")
 	_, _ = w.Write(resp)
-}
-
-func (subway *Subway) NewInteractionContext(ctx context.Context) context.Context {
-	return AddSubwayToContext(ctx, subway)
 }
 
 func (subway *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {

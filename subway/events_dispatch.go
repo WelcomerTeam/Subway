@@ -13,30 +13,29 @@ func (subway *Subway) ProcessInteraction(ctx context.Context, interaction discor
 	command := subway.Commands.GetCommand(interaction.Data.Name)
 
 	// Create interaction context
-	interactionContext := AddInteractionToContext(ctx, &interaction)
-	interactionContext = AddInteractionCommandToContext(interactionContext, command)
+	interactionContext := AddInteractionCommandToContext(ctx, command)
 	interactionContext = AddArgumentsToContext(interactionContext, make(map[string]*Argument))
 	interactionContext = AddRawOptionsToContext(interactionContext, extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)))
 	interactionContext = AddCommandBranchToContext(interactionContext, commandTree)
 	interactionContext = AddCommandTreeToContext(interactionContext, commandTree)
 
 	if command == nil {
-		return subway.Commands.propagateError(interactionContext, ErrCommandNotFound), ErrCommandNotFound
+		return subway.Commands.propagateError(interactionContext, subway, interaction, ErrCommandNotFound), ErrCommandNotFound
 	}
 
 	if subway.OnBeforeInteraction != nil {
-		err := subway.OnBeforeInteraction(interactionContext)
+		err := subway.OnBeforeInteraction(interactionContext, subway, interaction)
 		if err != nil {
-			return subway.Commands.propagateError(interactionContext, err), err
+			return subway.Commands.propagateError(interactionContext, subway, interaction, err), err
 		}
 	}
 
-	response, err := command.Invoke(ctx)
+	response, err := command.Invoke(ctx, subway, interaction)
 
 	if subway.OnAfterInteraction != nil {
-		err = subway.OnAfterInteraction(interactionContext, response, err)
+		err = subway.OnAfterInteraction(interactionContext, subway, interaction, response, err)
 		if err != nil {
-			return subway.Commands.propagateError(interactionContext, err), err
+			return subway.Commands.propagateError(interactionContext, subway, interaction, err), err
 		}
 	}
 
@@ -61,9 +60,9 @@ func constructCommandTree(options []*discord.InteractionDataOption, tree []strin
 
 // CanRun checks all global bot checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
-func (subway *Subway) CanRun(ctx context.Context) (bool, error) {
+func (subway *Subway) CanRun(ctx context.Context, interaction discord.Interaction) (bool, error) {
 	for _, check := range subway.Commands.Checks {
-		canRun, err := check(ctx)
+		canRun, err := check(ctx, subway, interaction)
 		if err != nil {
 			return false, err
 		}
