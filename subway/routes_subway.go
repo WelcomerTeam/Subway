@@ -15,7 +15,7 @@ import (
 
 var InteractionPongResponse = []byte(`{"type":1}`)
 
-func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
+func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 
@@ -28,16 +28,16 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		subway.Logger.Warn().Err(err).Msg("Failed to read body")
+		sub.Logger.Warn().Err(err).Msg("Failed to read body")
 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
 		return
 	}
 
-	verified := subway.verifySignature(r, body)
+	verified := sub.verifySignature(r, body)
 	if !verified {
-		subway.Logger.Warn().Msg("Sender passed invalid signature")
+		sub.Logger.Warn().Msg("Sender passed invalid signature")
 
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 
@@ -70,7 +70,7 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 
 	err = jsoniter.Unmarshal(body, &interaction)
 	if err != nil {
-		subway.Logger.Warn().Err(err).Msg("Failed to parse interaction")
+		sub.Logger.Warn().Err(err).Msg("Failed to parse interaction")
 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
@@ -84,7 +84,7 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	response, err := subway.ProcessInteraction(subway.Context, interaction)
+	response, err := sub.ProcessInteraction(sub.Context, interaction)
 
 	var guildID string
 
@@ -101,7 +101,7 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
 	if err != nil {
-		subway.Logger.Warn().Err(err).Send()
+		sub.Logger.Warn().Err(err).Send()
 
 		subwayFailedInteractionTotal.Add(1)
 
@@ -123,11 +123,11 @@ func (subway *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request
 	_, _ = w.Write(resp)
 }
 
-func (subway *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {
+func (sub *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {
 	return &sandwich.GRPCContext{
 		Context:        ctx,
-		Logger:         subway.Logger,
-		SandwichClient: subway.SandwichClient,
-		GRPCInterface:  subway.GRPCInterface,
+		Logger:         sub.Logger,
+		SandwichClient: sub.SandwichClient,
+		GRPCInterface:  sub.GRPCInterface,
 	}
 }

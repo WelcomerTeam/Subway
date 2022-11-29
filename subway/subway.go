@@ -49,7 +49,7 @@ type Subway struct {
 	webhooks []string
 }
 
-// SubwayOptions represents the options to create a new subway service.
+// SubwayOptions represents the options to create a new sub service.
 type SubwayOptions struct {
 	SandwichClient protobuf.SandwichClient
 	RESTInterface  discord.RESTInterface
@@ -65,7 +65,7 @@ type SubwayOptions struct {
 }
 
 func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
-	subway := &Subway{
+	sub := &Subway{
 		Context: ctx,
 
 		Logger: options.Logger,
@@ -89,41 +89,41 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 
 	var err error
 
-	subway.publicKey, err = hex.DecodeString(options.PublicKey)
+	sub.publicKey, err = hex.DecodeString(options.PublicKey)
 	if err != nil {
 		return nil, ErrInvalidPublicKey
 	}
 
 	// Setup sessions
-	subway.EmptySession = discord.NewSession(ctx, "", subway.RESTInterface, subway.Logger)
+	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface, sub.Logger)
 
-	return subway, nil
+	return sub, nil
 }
 
 // Listen handles starting up the webserver and services for you.
-func (subway *Subway) ListenAndServe(route, host string) error {
+func (sub *Subway) ListenAndServe(route, host string) error {
 	if route == "" {
 		route = "/"
 	}
 
-	subway.StartTime = time.Now().UTC()
-	subway.Logger.Info().Msgf("Starting subway Version %s", VERSION)
+	sub.StartTime = time.Now().UTC()
+	sub.Logger.Info().Msgf("Starting sub Version %s", VERSION)
 
-	go subway.PublishSimpleWebhook(subway.EmptySession, "Starting subway", "", "Version "+VERSION, EmbedColourSandwich)
+	go sub.PublishSimpleWebhook(sub.EmptySession, "Starting sub", "", "Version "+VERSION, EmbedColourSandwich)
 
 	// Setup Prometheus
-	go subway.SetupPrometheus()
+	go sub.SetupPrometheus()
 
-	subway.Logger.Info().Msgf("Serving subway at %s", host)
+	sub.Logger.Info().Msgf("Serving sub at %s", host)
 
 	subwayMux := http.NewServeMux()
-	subwayMux.HandleFunc(route, subway.HandleSubwayRequest)
+	subwayMux.HandleFunc(route, sub.HandleSubwayRequest)
 
 	err := http.ListenAndServe(host, subwayMux)
 	if err != nil {
-		subway.Logger.Error().Str("host", subway.prometheusAddress).Err(err).Msg("Failed to serve subway server")
+		sub.Logger.Error().Str("host", sub.prometheusAddress).Err(err).Msg("Failed to serve sub server")
 
-		return fmt.Errorf("failed to serve subway: %w", err)
+		return fmt.Errorf("failed to serve sub: %w", err)
 	}
 
 	println("D")
@@ -134,10 +134,10 @@ func (subway *Subway) ListenAndServe(route, host string) error {
 // SyncCommands syncs all registered commands with the discord API.
 // Use sandwichClient.FetchIdentifier to get the token for an identifier.
 // Token must have "Bot " added.
-func (subway *Subway) SyncCommands(ctx context.Context, token string, applicationID discord.Snowflake) error {
-	session := discord.NewSession(ctx, token, subway.RESTInterface, subway.Logger)
+func (sub *Subway) SyncCommands(ctx context.Context, token string, applicationID discord.Snowflake) error {
+	session := discord.NewSession(ctx, token, sub.RESTInterface, sub.Logger)
 
-	applicationCommands := subway.Commands.MapApplicationCommands()
+	applicationCommands := sub.Commands.MapApplicationCommands()
 
 	_, err := discord.BulkOverwriteGlobalApplicationCommands(session, applicationID, applicationCommands)
 	if err != nil {

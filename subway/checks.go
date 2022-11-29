@@ -13,7 +13,7 @@ const (
 	HeaderTimestamp = "X-Signature-Timestamp"
 )
 
-func (subway *Subway) verifySignature(request *http.Request, body []byte) bool {
+func (sub *Subway) verifySignature(request *http.Request, body []byte) bool {
 	sig, ok := verifyEd25519Header(request.Header.Get(HeaderSignature))
 	if !ok {
 		return false
@@ -21,7 +21,7 @@ func (subway *Subway) verifySignature(request *http.Request, body []byte) bool {
 
 	timestamp := request.Header.Get(HeaderTimestamp)
 
-	return ed25519.Verify(subway.publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
+	return ed25519.Verify(sub.publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
 }
 
 func verifyEd25519Header(value string) ([]byte, bool) {

@@ -38,7 +38,7 @@ type Argument struct {
 	value        interface{}
 }
 
-type InteractionArgumentConverterType func(ctx context.Context, subway *Subway, interaction discord.Interaction, argument *discord.InteractionDataOption) (out interface{}, err error)
+type InteractionArgumentConverterType func(ctx context.Context, sub *Subway, interaction discord.Interaction, argument *discord.InteractionDataOption) (out interface{}, err error)
 
 type InteractionConverters struct {
 	convertersMu sync.RWMutex
@@ -73,7 +73,7 @@ func (co *InteractionConverters) GetConverter(converterType ArgumentType) *Inter
 // HandleInteractionArgumentTypeSnowflake handles converting from a string
 // argument into a Snowflake type. Use .Snowflake() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeSnowflake(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -104,7 +104,7 @@ func HandleInteractionArgumentTypeSnowflake(ctx context.Context, subway *Subway,
 // HandleInteractionArgumentTypeMember handles converting from a string
 // argument into a Member type. Use .Member() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeMember(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -126,7 +126,7 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, subway *Subway, in
 // HandleInteractionArgumentTypeUser handles converting from a string
 // argument into a User type. Use .User() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeUser(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -148,7 +148,7 @@ func HandleInteractionArgumentTypeUser(ctx context.Context, subway *Subway, inte
 // HandleInteractionArgumentTypeGuildChannel handles converting from a string
 // argument into a TextChannel type. Use .Channel() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -170,7 +170,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, subway *Subw
 // HandleInteractionArgumentTypeGuild handles converting from a string
 // argument into a Guild type. Use .Guild() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeGuild(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -183,7 +183,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, subway *Subway, int
 	var result *discord.Guild
 
 	if match == "" {
-		guilds, err := subway.GRPCInterface.FetchGuildsByName(subway.NewGRPCContext(ctx), argument)
+		guilds, err := sub.GRPCInterface.FetchGuildsByName(sub.NewGRPCContext(ctx), argument)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch guild: %w", err)
 		}
@@ -196,7 +196,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, subway *Subway, int
 
 		result = sandwich.NewGuild(discord.Snowflake(guildID))
 
-		result, err = sandwich.FetchGuild(subway.NewGRPCContext(ctx), result)
+		result, err = sandwich.FetchGuild(sub.NewGRPCContext(ctx), result)
 		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, fmt.Errorf("failed to fetch guild: %w", err)
 		}
@@ -212,7 +212,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, subway *Subway, int
 // HandleInteractionArgumentTypeRole handles converting from a string
 // argument into a Role type. Use .Role() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeRole(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -234,7 +234,7 @@ func HandleInteractionArgumentTypeRole(ctx context.Context, subway *Subway, inte
 // HandleInteractionArgumentTypeColour handles converting from a string
 // argument into a Colour type. Use .Colour() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeColour(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -276,7 +276,7 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, subway *Subway, in
 // HandleInteractionArgumentTypeEmoji handles converting from a string
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeEmoji(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -305,7 +305,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, subway *Subway, int
 	if result == nil {
 		if match == "" {
 			if interaction.GuildID != nil {
-				emojis, err := subway.GRPCInterface.FetchEmojisByName(subway.NewGRPCContext(ctx), *interaction.GuildID, argument)
+				emojis, err := sub.GRPCInterface.FetchEmojisByName(sub.NewGRPCContext(ctx), *interaction.GuildID, argument)
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch emoji: %w", err)
 				}
@@ -321,7 +321,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, subway *Subway, int
 		}
 	}
 
-	result, err = sandwich.FetchEmoji(subway.NewGRPCContext(ctx), result)
+	result, err = sandwich.FetchEmoji(sub.NewGRPCContext(ctx), result)
 	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, fmt.Errorf("failed to fetch emoji: %w", err)
 	}
@@ -332,7 +332,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, subway *Subway, int
 // HandleInteractionArgumentTypePartialEmoji handles converting from a string
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -361,7 +361,7 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, subway *Subw
 // HandleInteractionArgumentTypeString handles converting from a string
 // argument into a String type. Use .String() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeString(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -375,7 +375,7 @@ func HandleInteractionArgumentTypeString(ctx context.Context, subway *Subway, in
 // HandleInteractionArgumentTypeBool handles converting from a string
 // argument into a Bool type. Use .Bool() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeBool(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument bool
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -389,7 +389,7 @@ func HandleInteractionArgumentTypeBool(ctx context.Context, subway *Subway, inte
 // HandleInteractionArgumentTypeInt handles converting from a string
 // argument into a Int type. Use .Int64() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeInt(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument int64
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -403,7 +403,7 @@ func HandleInteractionArgumentTypeInt(ctx context.Context, subway *Subway, inter
 // HandleInteractionArgumentTypeFloat handles converting from a string
 // argument into a Float type. Use .Float64() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeFloat(ctx context.Context, subway *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeFloat(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)

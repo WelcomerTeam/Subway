@@ -20,10 +20,10 @@ const (
 )
 
 // PublishSimpleWebhook is a helper function for creating quicker webhook messages.
-func (subway *Subway) PublishSimpleWebhook(s *discord.Session, title string, description string, footer string, colour int32) {
+func (sub *Subway) PublishSimpleWebhook(s *discord.Session, title string, description string, footer string, colour int32) {
 	now := time.Now().UTC()
 
-	subway.PublishWebhook(s, discord.WebhookMessageParams{
+	sub.PublishWebhook(s, discord.WebhookMessageParams{
 		Embeds: []*discord.Embed{
 			{
 				Title:       title,
@@ -39,18 +39,18 @@ func (subway *Subway) PublishSimpleWebhook(s *discord.Session, title string, des
 }
 
 // PublishWebhook sends a webhook message to all added webhooks in the configuration.
-func (subway *Subway) PublishWebhook(session *discord.Session, message discord.WebhookMessageParams) {
-	for _, webhookURL := range subway.webhooks {
+func (sub *Subway) PublishWebhook(session *discord.Session, message discord.WebhookMessageParams) {
+	for _, webhookURL := range sub.webhooks {
 		webhook, err := sandwich.WebhookFromURL(webhookURL)
 		if err != nil {
-			subway.Logger.Warn().Err(err).Str("url", webhookURL).Msg("Failed to parse webhook from URL")
+			sub.Logger.Warn().Err(err).Str("url", webhookURL).Msg("Failed to parse webhook from URL")
 
 			continue
 		}
 
 		_, err = webhook.Send(session, message, false)
 		if err != nil && !errors.Is(err, context.Canceled) {
-			subway.Logger.Warn().Err(err).Str("url", webhookURL).Msg("Failed to send webhook")
+			sub.Logger.Warn().Err(err).Str("url", webhookURL).Msg("Failed to send webhook")
 		}
 	}
 }
