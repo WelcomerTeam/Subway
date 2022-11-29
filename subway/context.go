@@ -25,7 +25,9 @@ func AddInteractionCommandToContext(ctx context.Context, v *InteractionCommandab
 }
 
 func GetInteractionCommandFromContext(ctx context.Context) *InteractionCommandable {
-	return ctx.Value(InteractionCommandKey).(*InteractionCommandable)
+	value, _ := ctx.Value(InteractionCommandKey).(*InteractionCommandable)
+
+	return value
 }
 
 // Arguments context handler.
@@ -34,7 +36,9 @@ func AddArgumentsToContext(ctx context.Context, v map[string]*Argument) context.
 }
 
 func GetArgumentsFromContext(ctx context.Context) map[string]*Argument {
-	return ctx.Value(ArgumentsKey).(map[string]*Argument)
+	value, _ := ctx.Value(ArgumentsKey).(map[string]*Argument)
+
+	return value
 }
 
 // RawOptions context handler.
@@ -43,7 +47,9 @@ func AddRawOptionsToContext(ctx context.Context, v map[string]*discord.Interacti
 }
 
 func GetRawOptionsFromContext(ctx context.Context) map[string]*discord.InteractionDataOption {
-	return ctx.Value(RawOptionsKey).(map[string]*discord.InteractionDataOption)
+	value, _ := ctx.Value(RawOptionsKey).(map[string]*discord.InteractionDataOption)
+
+	return value
 }
 
 // CommandBranch context handler.
@@ -52,7 +58,9 @@ func AddCommandBranchToContext(ctx context.Context, v []string) context.Context 
 }
 
 func GetCommandBranchFromContext(ctx context.Context) []string {
-	return ctx.Value(CommandBranchKey).([]string)
+	value, _ := ctx.Value(CommandBranchKey).([]string)
+
+	return value
 }
 
 // CommandTree context handler.
@@ -61,7 +69,9 @@ func AddCommandTreeToContext(ctx context.Context, v []string) context.Context {
 }
 
 func GetCommandTreeFromContext(ctx context.Context) []string {
-	return ctx.Value(CommandTreeKey).([]string)
+	value, _ := ctx.Value(CommandTreeKey).([]string)
+
+	return value
 }
 
 // Identifier context handler.
@@ -70,5 +80,7 @@ func AddIdentifierToContext(ctx context.Context, v string) context.Context {
 }
 
 func GetIdentifierFromContext(ctx context.Context) string {
-	return ctx.Value(IdentifierKey).(string)
+	value, _ := ctx.Value(IdentifierKey).(string)
+
+	return value
 }

@@ -15,10 +15,11 @@ var (
 	ErrLoadConfigurationFailure = errors.New("failed to load configuration")
 
 	ErrFetchMissingGuild     = errors.New("object requires guild ID to fetch")
-	ErrFetchMissingSnowflake = errors.New("ibject requires snowflake to fetch")
+	ErrFetchMissingSnowflake = errors.New("object requires snowflake to fetch")
 
 	ErrCogAlreadyRegistered     = errors.New("cog with this name already exists")
 	ErrCommandAlreadyRegistered = errors.New("command with this name already exists")
+	ErrInvalidArgumentType      = errors.New("argument value is not correct type for converter used")
 
 	ErrCommandNotFound         = errors.New("command with this name was not found")
 	ErrCheckFailure            = errors.New("command failed built-in checks")
