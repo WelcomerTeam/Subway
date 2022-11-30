@@ -21,11 +21,12 @@ var (
 	ErrCommandAlreadyRegistered = errors.New("command with this name already exists")
 	ErrInvalidArgumentType      = errors.New("argument value is not correct type for converter used")
 
-	ErrCommandNotFound         = errors.New("command with this name was not found")
-	ErrCheckFailure            = errors.New("command failed built-in checks")
-	ErrMissingRequiredArgument = errors.New("command missing required arguments")
-	ErrArgumentNotFound        = errors.New("command argument was not found")
-	ErrConverterNotFound       = errors.New("command converter is not setup")
+	ErrCommandNotFound             = errors.New("command with this name was not found")
+	ErrCommandAutoCompleteNotFound = errors.New("autocomplete for command with this name was not found")
+	ErrCheckFailure                = errors.New("command failed built-in checks")
+	ErrMissingRequiredArgument     = errors.New("command missing required arguments")
+	ErrArgumentNotFound            = errors.New("command argument was not found")
+	ErrConverterNotFound           = errors.New("command converter is not setup")
 
 	// Converter errors.
 

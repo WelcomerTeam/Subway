@@ -12,6 +12,7 @@ import (
 type InteractionCheckFuncType func(ctx context.Context, sub *Subway, interaction discord.Interaction) (canRun bool, err error)
 
 type InteractionHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) (*discord.InteractionResponse, error)
+type InteractionAutocompleteHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) ([]*discord.ApplicationCommandOptionChoice, error)
 type InteractionErrorHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error)
 
 type InteractionRequestHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) error
@@ -40,6 +41,8 @@ type InteractionCommandable struct {
 
 	Handler      InteractionHandler
 	ErrorHandler InteractionErrorHandler
+
+	AutocompleteHandler InteractionAutocompleteHandler
 
 	commands map[string]*InteractionCommandable
 	parent   *InteractionCommandable
@@ -339,13 +342,34 @@ func (ic *InteractionCommandable) Invoke(ctx context.Context, sub *Subway, inter
 
 	var resp *discord.InteractionResponse
 
-	if ic.Handler != nil {
-		resp, err = ic.Handler(ctx, sub, interaction)
-		if err != nil {
-			return ic.propagateError(ctx, sub, interaction, err), err
+	switch interaction.Type {
+	case discord.InteractionTypeApplicationCommand,
+		discord.InteractionTypeMessageComponent,
+		discord.InteractionTypeModalSubmit:
+		if ic.Handler != nil {
+			resp, err = ic.Handler(ctx, sub, interaction)
+			if err != nil {
+				return ic.propagateError(ctx, sub, interaction, err), err
+			}
+		} else {
+			return ic.propagateError(ctx, sub, interaction, ErrCommandNotFound), ErrCommandNotFound
 		}
-	} else {
-		return ic.propagateError(ctx, sub, interaction, ErrCommandNotFound), ErrCommandNotFound
+	case discord.InteractionTypeApplicationCommandAutocomplete:
+		if ic.AutocompleteHandler != nil {
+			choices, err := ic.AutocompleteHandler(ctx, sub, interaction)
+			if err != nil {
+				return ic.propagateError(ctx, sub, interaction, err), err
+			}
+
+			resp = &discord.InteractionResponse{
+				Type: discord.InteractionCallbackTypeAutocompleteResult,
+				Data: &discord.InteractionCallbackData{
+					Choices: choices,
+				},
+			}
+		} else {
+			return ic.propagateError(ctx, sub, interaction, ErrCommandAutoCompleteNotFound), ErrCommandAutoCompleteNotFound
+		}
 	}
 
 	return resp, nil

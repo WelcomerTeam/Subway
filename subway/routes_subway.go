@@ -77,50 +77,56 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if interaction.Type == discord.InteractionTypePing {
-		w.Header().Add("Content-Type", "application/json")
-		_, _ = w.Write(InteractionPongResponse)
-
-		return
-	}
-
-	response, err := sub.ProcessInteraction(sub.Context, interaction)
-
 	var guildID string
 
 	var userID string
 
-	if interaction.GuildID != nil {
-		guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
-	}
+	switch interaction.Type {
+	case discord.InteractionTypePing:
+		w.Header().Add("Content-Type", "application/json")
+		_, _ = w.Write(InteractionPongResponse)
 
-	if interaction.User != nil {
-		userID = strconv.FormatInt(int64(interaction.User.ID), 10)
-	}
+		return
+	case discord.InteractionTypeApplicationCommand,
+		discord.InteractionTypeModalSubmit,
+		discord.InteractionTypeApplicationCommandAutocomplete,
+		discord.InteractionTypeMessageComponent:
+		response, err := sub.ProcessInteraction(sub.Context, interaction)
 
-	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
+		if interaction.GuildID != nil {
+			guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
+		}
 
-	if err != nil {
-		sub.Logger.Warn().Err(err).Send()
+		if interaction.User != nil {
+			userID = strconv.FormatInt(int64(interaction.User.ID), 10)
+		}
 
-		subwayFailedInteractionTotal.Add(1)
+		subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
-		w.WriteHeader(http.StatusNoContent)
+		if err != nil {
+			sub.Logger.Warn().Err(err).Send()
+
+			subwayFailedInteractionTotal.Add(1)
+
+			w.WriteHeader(http.StatusNoContent)
+
+			return
+		}
+
+		subwaySuccessfulInteractionTotal.Add(1)
+
+		resp, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		_, _ = w.Write(resp)
 
 		return
 	}
-
-	subwaySuccessfulInteractionTotal.Add(1)
-
-	resp, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	_, _ = w.Write(resp)
 }
 
 func (sub *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {
