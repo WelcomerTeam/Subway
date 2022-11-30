@@ -3,9 +3,9 @@ module github.com/WelcomerTeam/Subway
 go 1.18
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20221125141653-240921554909
-	github.com/WelcomerTeam/Sandwich v0.0.0-20221123144957-2b37bbe9a955
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9
+	github.com/WelcomerTeam/Discord v0.0.0-20221130161544-85846f26aceb
+	github.com/WelcomerTeam/Sandwich v0.0.0-20221130120623-dbe9dba9d876
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221128125143-3bc244d72648
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/pkg/errors v0.9.1

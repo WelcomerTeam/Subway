@@ -6,13 +6,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
-	"github.com/rs/zerolog"
-
 	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
+	"github.com/rs/zerolog"
 )
 
 // VERSION follows semantic versioning.
@@ -39,6 +39,9 @@ type Subway struct {
 	RESTInterface  discord.RESTInterface   `json:"-"`
 	EmptySession   *discord.Session        `json:"-"`
 
+	ComponentListenersMu sync.RWMutex
+	ComponentListeners   map[string]*ComponentListener
+
 	OnBeforeInteraction InteractionRequestHandler
 	OnAfterInteraction  InteractionResponseHandler
 
@@ -60,6 +63,8 @@ type SubwayOptions struct {
 
 	PublicKey         string
 	PrometheusAddress string
+
+	MaximumInteractionAge time.Duration
 
 	Webhooks []string
 }
@@ -97,7 +102,46 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	// Setup sessions
 	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface, sub.Logger)
 
+	go sub.InteractionCleanupJob(ctx, options.MaximumInteractionAge)
+
 	return sub, nil
+}
+
+func (sub *Subway) InteractionCleanupJob(ctx context.Context, maximumAge time.Duration) {
+	ticker := time.NewTicker(maximumAge)
+
+	for {
+		select {
+		case <-ticker.C:
+			sub.cleanupInteractions(maximumAge)
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (sub *Subway) cleanupInteractions(maximumAge time.Duration) {
+	now := time.Now()
+
+	sub.ComponentListenersMu.RLock()
+
+	deletedKeys := []string{}
+
+	for i, k := range sub.ComponentListeners {
+		if k.expiresAt.After(now) || k.createdAt.Add(maximumAge).After(now) {
+			deletedKeys = append(deletedKeys, i)
+		}
+	}
+
+	sub.ComponentListenersMu.RUnlock()
+
+	if len(deletedKeys) > 0 {
+		sub.ComponentListenersMu.Lock()
+		for _, key := range deletedKeys {
+			delete(sub.ComponentListeners, key)
+		}
+		sub.ComponentListenersMu.Unlock()
+	}
 }
 
 // Listen handles starting up the webserver and services for you.

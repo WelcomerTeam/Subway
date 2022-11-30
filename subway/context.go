@@ -17,6 +17,7 @@ const (
 	CommandBranchKey
 	CommandTreeKey
 	IdentifierKey
+	ComponentListenerKey
 )
 
 // InteractionCommand context handler.
@@ -81,6 +82,17 @@ func AddIdentifierToContext(ctx context.Context, v string) context.Context {
 
 func GetIdentifierFromContext(ctx context.Context) string {
 	value, _ := ctx.Value(IdentifierKey).(string)
+
+	return value
+}
+
+// ComponentListener context handler.
+func AddComponentListenerToContext(ctx context.Context, v *ComponentListener) context.Context {
+	return context.WithValue(ctx, ComponentListenerKey, v)
+}
+
+func GetComponentListenerFromContext(ctx context.Context) *ComponentListener {
+	value, _ := ctx.Value(ComponentListenerKey).(*ComponentListener)
 
 	return value
 }

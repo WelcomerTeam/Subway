@@ -88,10 +88,18 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case discord.InteractionTypeApplicationCommand,
-		discord.InteractionTypeModalSubmit,
 		discord.InteractionTypeApplicationCommandAutocomplete,
+		discord.InteractionTypeModalSubmit,
 		discord.InteractionTypeMessageComponent:
-		response, err := sub.ProcessInteraction(sub.Context, interaction)
+		var response *discord.InteractionResponse
+		var err error
+
+		if interaction.Type == discord.InteractionTypeApplicationCommand ||
+			interaction.Type == discord.InteractionTypeApplicationCommandAutocomplete {
+			response, err = sub.ProcessInteraction(sub.Context, interaction)
+		} else {
+			response, err = sub.ProcessComponent(sub.Context, interaction)
+		}
 
 		if interaction.GuildID != nil {
 			guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
@@ -104,8 +112,6 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
 		if err != nil {
-			sub.Logger.Warn().Err(err).Send()
-
 			subwayFailedInteractionTotal.Add(1)
 
 			w.WriteHeader(http.StatusNoContent)
@@ -115,15 +121,19 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 		subwaySuccessfulInteractionTotal.Add(1)
 
-		resp, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		if response != nil {
+			resp, err := json.Marshal(response)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
-			return
+				return
+			}
+
+			w.Header().Add("Content-Type", "application/json")
+			_, _ = w.Write(resp)
+		} else {
+			w.WriteHeader(http.StatusNoContent)
 		}
-
-		w.Header().Add("Content-Type", "application/json")
-		_, _ = w.Write(resp)
 
 		return
 	}

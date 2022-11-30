@@ -11,12 +11,16 @@ import (
 // Func Type used for command checks.
 type InteractionCheckFuncType func(ctx context.Context, sub *Subway, interaction discord.Interaction) (canRun bool, err error)
 
-type InteractionHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) (*discord.InteractionResponse, error)
-type InteractionAutocompleteHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) ([]*discord.ApplicationCommandOptionChoice, error)
-type InteractionErrorHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error)
+type (
+	InteractionHandler             func(ctx context.Context, sub *Subway, interaction discord.Interaction) (*discord.InteractionResponse, error)
+	InteractionAutocompleteHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) ([]*discord.ApplicationCommandOptionChoice, error)
+	InteractionErrorHandler        func(ctx context.Context, sub *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error)
+)
 
-type InteractionRequestHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) error
-type InteractionResponseHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction, resp *discord.InteractionResponse, err error) error
+type (
+	InteractionRequestHandler  func(ctx context.Context, sub *Subway, interaction discord.Interaction) error
+	InteractionResponseHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction, resp *discord.InteractionResponse, err error) error
+)
 
 type InteractionCommandableType uint8
 

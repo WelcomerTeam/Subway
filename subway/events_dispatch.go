@@ -7,7 +7,28 @@ import (
 	"github.com/WelcomerTeam/Discord/discord"
 )
 
-// ProcessInteraction processes the interaction that has been registered to the bot.
+// ProcessComponent processes the component that has been sent.
+func (sub *Subway) ProcessComponent(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
+	sub.ComponentListenersMu.RLock()
+	listener, ok := sub.ComponentListeners[interaction.Data.CustomID]
+	sub.ComponentListenersMu.RUnlock()
+
+	ctx = AddComponentListenerToContext(ctx, listener)
+
+	if !ok {
+		return nil, ErrComponentListenerNotFound
+	}
+
+	if listener.Channel != nil {
+		listener.Channel <- &interaction
+
+		return nil, nil
+	}
+
+	return listener.Handler(ctx, sub, interaction)
+}
+
+// ProcessInteraction processes the interaction that has been sent.
 func (sub *Subway) ProcessInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
 	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
 	command := sub.Commands.GetCommand(interaction.Data.Name)
