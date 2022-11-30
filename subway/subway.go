@@ -49,7 +49,7 @@ type Subway struct {
 	webhooks []string
 }
 
-// SubwayOptions represents the options to create a new sub service.
+// SubwayOptions represents the options to create a new subway service.
 type SubwayOptions struct {
 	SandwichClient protobuf.SandwichClient
 	RESTInterface  discord.RESTInterface
@@ -107,26 +107,24 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 	}
 
 	sub.StartTime = time.Now().UTC()
-	sub.Logger.Info().Msgf("Starting sub Version %s", VERSION)
+	sub.Logger.Info().Msgf("Starting subway Version %s", VERSION)
 
 	go sub.PublishSimpleWebhook(sub.EmptySession, "Starting sub", "", "Version "+VERSION, EmbedColourSandwich)
 
 	// Setup Prometheus
 	go sub.SetupPrometheus()
 
-	sub.Logger.Info().Msgf("Serving sub at %s", host)
+	sub.Logger.Info().Msgf("Serving subway at %s", host)
 
 	subwayMux := http.NewServeMux()
 	subwayMux.HandleFunc(route, sub.HandleSubwayRequest)
 
 	err := http.ListenAndServe(host, subwayMux)
 	if err != nil {
-		sub.Logger.Error().Str("host", sub.prometheusAddress).Err(err).Msg("Failed to serve sub server")
+		sub.Logger.Error().Str("host", sub.prometheusAddress).Err(err).Msg("Failed to serve subway server")
 
 		return fmt.Errorf("failed to serve sub: %w", err)
 	}
-
-	println("D")
 
 	return nil
 }
