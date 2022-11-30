@@ -21,6 +21,8 @@ const VERSION = "0.2"
 const (
 	PermissionsDefault = 0o744
 	PermissionWrite    = 0o600
+
+	defaultMaximumInteractionAge = 15 * time.Minute
 )
 
 type Subway struct {
@@ -64,6 +66,9 @@ type SubwayOptions struct {
 	PublicKey         string
 	PrometheusAddress string
 
+	// Maximum age for component listeners. Defaults to 15 minutes.
+	// This is the absolute maximum age of a component listener,
+	// ignoring a listener with a longer age.
 	MaximumInteractionAge time.Duration
 
 	Webhooks []string
@@ -101,6 +106,10 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 
 	// Setup sessions
 	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface, sub.Logger)
+
+	if options.MaximumInteractionAge <= 0 {
+		options.MaximumInteractionAge = defaultMaximumInteractionAge
+	}
 
 	go sub.InteractionCleanupJob(ctx, options.MaximumInteractionAge)
 
