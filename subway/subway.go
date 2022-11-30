@@ -84,6 +84,9 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 		SandwichClient: options.SandwichClient,
 		GRPCInterface:  sandwich.NewDefaultGRPCClient(),
 
+		ComponentListenersMu: sync.RWMutex{},
+		ComponentListeners:   make(map[string]*ComponentListener),
+
 		OnBeforeInteraction: options.OnBeforeInteraction,
 		OnAfterInteraction:  options.OnAfterInteraction,
 
