@@ -81,61 +81,58 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	var userID string
 
-	switch interaction.Type {
-	case discord.InteractionTypePing:
+	if interaction.Type == discord.InteractionTypePing {
 		w.Header().Add("Content-Type", "application/json")
 		_, _ = w.Write(InteractionPongResponse)
 
 		return
-	case discord.InteractionTypeApplicationCommand,
-		discord.InteractionTypeApplicationCommandAutocomplete,
-		discord.InteractionTypeModalSubmit,
-		discord.InteractionTypeMessageComponent:
-		var response *discord.InteractionResponse
-		var err error
+	}
 
-		if interaction.Type == discord.InteractionTypeApplicationCommand ||
-			interaction.Type == discord.InteractionTypeApplicationCommandAutocomplete {
-			response, err = sub.ProcessInteraction(sub.Context, interaction)
-		} else {
-			response, err = sub.ProcessComponent(sub.Context, interaction)
-		}
+	var response *discord.InteractionResponse
 
-		if interaction.GuildID != nil {
-			guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
-		}
+	switch interaction.Type {
+	case discord.InteractionTypeApplicationCommand, discord.InteractionTypeApplicationCommandAutocomplete:
+		response, err = sub.ProcessApplicationCommandInteraction(sub.Context, interaction)
+	case discord.InteractionTypeMessageComponent:
+		response, err = sub.ProcessMessageComponentInteraction(sub.Context, interaction)
+	// case discord.InteractionTypeModalSubmit:
+	// 	// not implemented
+	default:
+		sub.Logger.Warn().Int("interaction_type", int(interaction.Type)).Msg("Missing interaction handler")
+	}
 
-		if interaction.User != nil {
-			userID = strconv.FormatInt(int64(interaction.User.ID), 10)
-		}
+	if interaction.GuildID != nil {
+		guildID = strconv.FormatInt(int64(*interaction.GuildID), 10)
+	}
 
-		subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
+	if interaction.User != nil {
+		userID = strconv.FormatInt(int64(interaction.User.ID), 10)
+	}
 
+	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
+
+	if err != nil {
+		subwayFailedInteractionTotal.Add(1)
+
+		w.WriteHeader(http.StatusNoContent)
+
+		return
+	}
+
+	subwaySuccessfulInteractionTotal.Add(1)
+
+	if response != nil {
+		resp, err := json.Marshal(response)
 		if err != nil {
-			subwayFailedInteractionTotal.Add(1)
-
-			w.WriteHeader(http.StatusNoContent)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
 			return
 		}
 
-		subwaySuccessfulInteractionTotal.Add(1)
-
-		if response != nil {
-			resp, err := json.Marshal(response)
-			if err != nil {
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-
-				return
-			}
-
-			w.Header().Add("Content-Type", "application/json")
-			_, _ = w.Write(resp)
-		} else {
-			w.WriteHeader(http.StatusNoContent)
-		}
-
-		return
+		w.Header().Add("Content-Type", "application/json")
+		_, _ = w.Write(resp)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

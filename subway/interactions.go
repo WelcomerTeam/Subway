@@ -129,6 +129,8 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			applicationOptionType = discord.ApplicationCommandOptionTypeString
 		case ArgumentTypeMember, ArgumentTypeUser:
 			applicationOptionType = discord.ApplicationCommandOptionTypeUser
+		case ArgumentTypeChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 		case ArgumentTypeTextChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildText
@@ -450,7 +452,7 @@ func (ic *InteractionCommandable) prepare(ctx context.Context, sub *Subway, inte
 	return ctx, nil
 }
 
-// parseArgynebts generates the arguments for a command.
+// parseArguments generates the arguments for a command.
 func (ic *InteractionCommandable) parseArguments(ctx context.Context, sub *Subway, interaction discord.Interaction) (context.Context, error) {
 	arguments := map[string]*Argument{}
 

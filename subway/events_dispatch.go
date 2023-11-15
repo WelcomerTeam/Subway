@@ -5,31 +5,11 @@ import (
 	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
+	jsoniter "github.com/json-iterator/go"
 )
 
-// ProcessComponent processes the component that has been sent.
-func (sub *Subway) ProcessComponent(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
-	sub.ComponentListenersMu.RLock()
-	listener, ok := sub.ComponentListeners[interaction.Data.CustomID]
-	sub.ComponentListenersMu.RUnlock()
-
-	ctx = AddComponentListenerToContext(ctx, listener)
-
-	if !ok {
-		return nil, ErrComponentListenerNotFound
-	}
-
-	if listener.Channel != nil {
-		listener.Channel <- &interaction
-
-		return nil, nil
-	}
-
-	return listener.Handler(ctx, sub, interaction)
-}
-
-// ProcessInteraction processes the interaction that has been sent.
-func (sub *Subway) ProcessInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
+// ProcessApplicationCommandInteraction processes the application command that has been received.
+func (sub *Subway) ProcessApplicationCommandInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
 	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
 	command := sub.Commands.GetCommand(interaction.Data.Name)
 
@@ -61,6 +41,70 @@ func (sub *Subway) ProcessInteraction(ctx context.Context, interaction discord.I
 	}
 
 	return response, nil
+}
+
+// ProcessMessageComponentInteraction processes the message component that has been received.
+func (sub *Subway) ProcessMessageComponentInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
+	sub.ComponentListenersMu.RLock()
+	listener, hasListener := sub.ComponentListeners[interaction.Data.CustomID]
+	sub.ComponentListenersMu.RUnlock()
+
+	if !hasListener {
+		return nil, ErrComponentListenerNotFound
+	}
+
+	arguments := make(map[string]*Argument)
+
+	var err error
+	arguments, err = parseComponentData(arguments, interaction.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = AddComponentListenerToContext(ctx, listener)
+	ctx = AddArgumentsToContext(ctx, arguments)
+
+	if listener.Channel != nil {
+		listener.Channel <- &interaction
+
+		return nil, nil
+	}
+
+	return listener.Handler(ctx, sub, interaction)
+}
+
+// parseComponentData generates the arguments for a component interaction.
+func parseComponentData(arguments map[string]*Argument, data *discord.InteractionData) (map[string]*Argument, error) {
+	// Now, for simplicity, we will just return the string list we receive from discord.
+	// Optimally, we could properly handle all the different types for the select and appropriately
+	// use the associated data structures, but making it in a way that wasn't ugly was proving not easy.
+
+	// We will let the user decide what they want to do with the list of values. They have access to
+	// the interaction payload so they have the resolved records already.
+
+	var argument []string
+
+	err := jsoniter.Unmarshal(data.Value, &argument)
+	if err != nil {
+		return arguments, fmt.Errorf("failed to unmarshal option value: %w", err)
+	}
+
+	arguments[data.CustomID] = &Argument{
+		ArgumentType: ArgumentTypeStrings,
+		value:        argument,
+	}
+
+	return arguments, nil
+}
+
+func convertComponentOptions(options []*discord.ApplicationSelectOption) []string {
+	strings := make([]string, 0)
+
+	for _, option := range options {
+		strings = append(strings, option.Value)
+	}
+
+	return strings
 }
 
 func constructCommandTree(options []*discord.InteractionDataOption, tree []string) []string {

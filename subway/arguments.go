@@ -268,12 +268,13 @@ func (a *Argument) MustInt() int64 {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Float() (float64, error) {
-	v, ok := a.value.(float64)
-	if !ok {
-		return v, ErrInvalidArgumentType
+	if argumentTypeIs(a.ArgumentType, ArgumentTypeFloat) {
+		value, _ := a.value.(float64)
+
+		return value, nil
 	}
 
-	return v, nil
+	return 0, ErrInvalidArgumentType
 }
 
 // MustFloat will attempt to do Float() and will panic if not possible.
@@ -281,6 +282,29 @@ func (a *Argument) MustFloat() float64 {
 	value, err := a.Float()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Float(): %v`, err.Error()))
+	}
+
+	return value
+}
+
+// Strings returns an argument as the specified Type.
+// If the argument is not the right type for the converter
+// that made the argument, ErrInvalidArgumentType will be returned.
+func (a *Argument) Strings() ([]string, error) {
+	if argumentTypeIs(a.ArgumentType, ArgumentTypeStrings) {
+		value, _ := a.value.([]string)
+
+		return value, nil
+	}
+
+	return nil, ErrInvalidArgumentType
+}
+
+// MustStrings will attempt to do Strings() and will panic if not possible.
+func (a *Argument) MustStrings() []string {
+	value, err := a.Strings()
+	if err != nil {
+		panic(fmt.Sprintf(`argument: Strings(): %v`, err.Error()))
 	}
 
 	return value

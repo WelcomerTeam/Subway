@@ -129,6 +129,8 @@ func main() {
 		logger.Panic().Err(err).Msg("Exception creating app")
 	}
 
+	// Register Cogs here. Either via app.RegisterCog or app.MustRegisterCog
+
 	err = app.ListenAndServe("", *host)
 	if err != nil {
 		logger.Warn().Err(err).Msg("Exceptions whilst starting app")
