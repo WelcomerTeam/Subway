@@ -129,8 +129,6 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			applicationOptionType = discord.ApplicationCommandOptionTypeString
 		case ArgumentTypeMember, ArgumentTypeUser:
 			applicationOptionType = discord.ApplicationCommandOptionTypeUser
-		case ArgumentTypeChannel:
-			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 		case ArgumentTypeTextChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildText
@@ -309,10 +307,9 @@ func (ic *InteractionCommandable) IsGroup() bool {
 
 // Invoke handles the execution of a command or a group.
 func (ic *InteractionCommandable) Invoke(ctx context.Context, sub *Subway, interaction discord.Interaction) (*discord.InteractionResponse, error) {
-	commandTree := GetCommandTreeFromContext(ctx)
 	commandBranch := GetCommandBranchFromContext(ctx)
 
-	if len(commandTree) > 0 {
+	if len(commandBranch) > 0 {
 		if ic.IsGroup() {
 			branch := commandBranch[0]
 			commandContext := AddCommandBranchToContext(ctx, commandBranch[1:])

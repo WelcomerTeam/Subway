@@ -50,8 +50,6 @@ type Subway struct {
 	// Environment Variables.
 	publicKey         ed25519.PublicKey
 	prometheusAddress string
-
-	webhooks []string
 }
 
 // SubwayOptions represents the options to create a new subway service.
@@ -70,8 +68,6 @@ type SubwayOptions struct {
 	// This is the absolute maximum age of a component listener,
 	// ignoring a listener with a longer age.
 	MaximumInteractionAge time.Duration
-
-	Webhooks []string
 }
 
 func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
@@ -96,8 +92,6 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 		Converters: NewInteractionConverters(),
 
 		Cogs: make(map[string]Cog),
-
-		webhooks: options.Webhooks,
 	}
 
 	var err error
@@ -164,8 +158,6 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 
 	sub.StartTime = time.Now().UTC()
 	sub.Logger.Info().Msgf("Starting subway Version %s", VERSION)
-
-	go sub.PublishSimpleWebhook(sub.EmptySession, "Starting sub", "", "Version "+VERSION, EmbedColourSandwich)
 
 	// Setup Prometheus
 	go sub.SetupPrometheus()
