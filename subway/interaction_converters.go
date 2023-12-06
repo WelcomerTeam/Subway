@@ -51,7 +51,7 @@ type InteractionConverter struct {
 }
 
 // RegisterConverter adds a new converter. If there is already a
-// converter registered with its name, it will be overrifden.
+// converter registered with its name, it will be overridden.
 func (co *InteractionConverters) RegisterConverter(converterName ArgumentType, converter InteractionArgumentConverterType, defaultValue interface{}) {
 	co.convertersMu.Lock()
 	defer co.convertersMu.Unlock()
@@ -114,10 +114,19 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
 
-	result := interaction.Data.Resolved.Members[discord.Snowflake(snowflakeID)]
+	snowflake := discord.Snowflake(snowflakeID)
+
+	result := interaction.Data.Resolved.Members[snowflake]
 
 	if result == nil {
 		return nil, ErrMemberNotFound
+	}
+
+	userResult := interaction.Data.Resolved.Users[snowflake]
+	if userResult != nil {
+		result.User = userResult
+	} else {
+		sub.Logger.Warn().Int64("id", snowflakeID).Msg("Member present in interaction resolved, but no User is present")
 	}
 
 	return result, nil
