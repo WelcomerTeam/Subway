@@ -16,7 +16,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.2"
+const VERSION = "0.2.1"
 
 const (
 	PermissionsDefault = 0o744
@@ -102,7 +102,7 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	}
 
 	// Setup sessions
-	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface, sub.Logger)
+	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface)
 
 	if options.MaximumInteractionAge <= 0 {
 		options.MaximumInteractionAge = defaultMaximumInteractionAge
@@ -181,7 +181,7 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 // Use sandwichClient.FetchIdentifier to get the token for an identifier.
 // Token must have "Bot " added.
 func (sub *Subway) SyncCommands(ctx context.Context, token string, applicationID discord.Snowflake) error {
-	session := discord.NewSession(ctx, token, sub.RESTInterface, sub.Logger)
+	session := discord.NewSession(ctx, token, sub.RESTInterface)
 
 	applicationCommands := sub.Commands.MapApplicationCommands()
 
