@@ -31,6 +31,7 @@ type ArgumentParameter struct {
 	Description              string
 	NameLocalizations        map[string]string
 	DescriptionLocalizations map[string]string
+	Choices                  []*discord.ApplicationCommandOptionChoice
 }
 
 type Argument struct {

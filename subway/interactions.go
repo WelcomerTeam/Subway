@@ -170,7 +170,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			NameLocalizations:        argument.NameLocalizations,
 			DescriptionLocalizations: argument.DescriptionLocalizations,
 			Required:                 argument.Required,
-			// Choices:      []*discord.ApplicationCommandOptionChoice{},
+			Choices:                  argument.Choices,
 			// Options:      applicationOptions,
 			// MinValue:     0,
 			// MaxValue:     0,
