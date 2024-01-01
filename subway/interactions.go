@@ -171,10 +171,12 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			DescriptionLocalizations: argument.DescriptionLocalizations,
 			Required:                 argument.Required,
 			Choices:                  argument.Choices,
-			// Options:      applicationOptions,
-			// MinValue:     0,
-			// MaxValue:     0,
-			// Autocomplete: false,
+			ChannelTypes:             argument.ChannelTypes,
+			MinValue:                 argument.MinValue,
+			MaxValue:                 argument.MaxValue,
+			MinLength:                argument.MinLength,
+			MaxLength:                argument.MaxLength,
+			Autocomplete:             argument.Autocomplete,
 		}
 
 		if channelType != 0 {

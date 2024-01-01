@@ -32,6 +32,13 @@ type ArgumentParameter struct {
 	NameLocalizations        map[string]string
 	DescriptionLocalizations map[string]string
 	Choices                  []*discord.ApplicationCommandOptionChoice
+
+	ChannelTypes []*discord.ChannelType
+	MinValue     *int32
+	MaxValue     *int32
+	MinLength    *int32
+	MaxLength    *int32
+	Autocomplete *bool
 }
 
 type Argument struct {
