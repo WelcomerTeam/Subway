@@ -108,13 +108,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			Description:              command.Description,
 			NameLocalizations:        command.NameLocalizations,
 			DescriptionLocalizations: command.DescriptionLocalizations,
-			// Required:     false,
-			// Choices:      []*discord.ApplicationCommandOptionChoice{},
 			Options: command.MapApplicationOptions(),
-			// ChannelTypes: []*discord.ChannelType{},
-			// MinValue:     0,
-			// MaxValue:     0,
-			// Autocomplete: false,
 		})
 	}
 
