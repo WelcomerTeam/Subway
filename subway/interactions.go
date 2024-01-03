@@ -180,7 +180,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		}
 
 		if channelType != 0 {
-			commandOption.ChannelTypes = []*discord.ChannelType{&channelType}
+			commandOption.ChannelTypes = []discord.ChannelType{channelType}
 		}
 
 		applicationOptions = append(applicationOptions, commandOption)

@@ -33,7 +33,7 @@ type ArgumentParameter struct {
 	DescriptionLocalizations map[string]string
 	Choices                  []*discord.ApplicationCommandOptionChoice
 
-	ChannelTypes []*discord.ChannelType
+	ChannelTypes []discord.ChannelType
 	MinValue     *int32
 	MaxValue     *int32
 	MinLength    *int32
