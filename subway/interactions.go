@@ -108,7 +108,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			Description:              command.Description,
 			NameLocalizations:        command.NameLocalizations,
 			DescriptionLocalizations: command.DescriptionLocalizations,
-			Options: command.MapApplicationOptions(),
+			Options:                  command.MapApplicationOptions(),
 		})
 	}
 
@@ -116,7 +116,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 
 	// Map arguments.
 	for _, argument := range ic.ArgumentParameter {
-		channelType = 0
+		channelType = -1
 
 		switch argument.ArgumentType {
 		case ArgumentTypeSnowflake:
@@ -173,7 +173,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			Autocomplete:             argument.Autocomplete,
 		}
 
-		if channelType != 0 {
+		if channelType != -1 {
 			commandOption.ChannelTypes = []discord.ChannelType{channelType}
 		}
 
