@@ -34,13 +34,13 @@ func (sub *Subway) ProcessApplicationCommandInteraction(ctx context.Context, int
 	response, err := command.Invoke(ctx, sub, interaction)
 
 	if sub.OnAfterInteraction != nil {
-		err = sub.OnAfterInteraction(ctx, sub, interaction, response, err)
-		if err != nil {
-			return sub.Commands.propagateError(ctx, sub, interaction, err), err
+		onAfterInteractionErr := sub.OnAfterInteraction(ctx, sub, interaction, response, err)
+		if onAfterInteractionErr != nil {
+			return sub.Commands.propagateError(ctx, sub, interaction, onAfterInteractionErr), onAfterInteractionErr
 		}
 	}
 
-	return response, nil
+	return response, err
 }
 
 // ProcessMessageComponentInteraction processes the message component that has been received.
@@ -84,14 +84,16 @@ func parseComponentData(arguments map[string]*Argument, data *discord.Interactio
 
 	var argument []string
 
-	err := jsoniter.Unmarshal(data.Value, &argument)
-	if err != nil {
-		return arguments, fmt.Errorf("failed to unmarshal option value: %w", err)
-	}
+	if len(data.Value) > 0 {
+		err := jsoniter.Unmarshal(data.Value, &argument)
+		if err != nil {
+			return arguments, fmt.Errorf("failed to unmarshal option value: %w", err)
+		}
 
-	arguments[data.CustomID] = &Argument{
-		ArgumentType: ArgumentTypeStrings,
-		value:        argument,
+		arguments[data.CustomID] = &Argument{
+			ArgumentType: ArgumentTypeStrings,
+			value:        argument,
+		}
 	}
 
 	return arguments, nil
