@@ -112,6 +112,8 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
 	if err != nil {
+		sub.Logger.Error().Err(err).Msg("Failed to process interaction")
+
 		subwayFailedInteractionTotal.Add(1)
 
 		w.WriteHeader(http.StatusNoContent)
@@ -132,6 +134,8 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		_, _ = w.Write(resp)
 	} else {
+		sub.Logger.Warn().Msg("No response to send")
+
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
