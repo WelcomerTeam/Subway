@@ -82,6 +82,10 @@ func (co *InteractionConverters) GetConverter(converterType ArgumentType) *Inter
 // argument into a Snowflake type. Use .Snowflake() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -113,6 +117,10 @@ func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, in
 // argument into a Member type. Use .Member() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -144,6 +152,10 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 // argument into a User type. Use .User() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -166,6 +178,10 @@ func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interac
 // argument into a TextChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -188,6 +204,10 @@ func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway,
 // argument into a Guild type. Use .Guild() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -230,6 +250,10 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 // argument into a Role type. Use .Role() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -252,6 +276,10 @@ func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interac
 // argument into a Colour type. Use .Colour() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -294,6 +322,10 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -350,6 +382,10 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -379,6 +415,10 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway,
 // argument into a String type. Use .String() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -393,6 +433,10 @@ func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, inter
 // argument into a Bool type. Use .Bool() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument bool
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -407,6 +451,10 @@ func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interac
 // argument into a Int type. Use .Int64() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument int64
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
@@ -421,6 +469,10 @@ func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interact
 // argument into a Float type. Use .Float64() within a command
 // to get the proper type.
 func HandleInteractionArgumentTypeFloat(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+	if len(option.Value) == 0 {
+		return nil, nil
+	}
+
 	var argument string
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
