@@ -3,7 +3,7 @@ package internal
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,7 +26,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		sub.Logger.Warn().Err(err).Msg("Failed to read body")
 
