@@ -46,7 +46,7 @@ type InteractionCommandable struct {
 	Handler      InteractionHandler
 	ErrorHandler InteractionErrorHandler
 
-	DefaultMemberPermission discord.Int64
+	DefaultMemberPermission *discord.Int64
 	DMPermission            *bool
 
 	AutocompleteHandler InteractionAutocompleteHandler
@@ -101,12 +101,14 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		}
 
 		applicationOptions = append(applicationOptions, &discord.ApplicationCommandOption{
-			Type:                     applicationOptionType,
 			Name:                     command.Name,
 			Description:              command.Description,
 			NameLocalizations:        command.NameLocalizations,
 			DescriptionLocalizations: command.DescriptionLocalizations,
 			Options:                  command.MapApplicationOptions(),
+			DefaultMemberPermission:  command.DefaultMemberPermission,
+			DMPermission:             command.DMPermission,
+			Type:                     applicationOptionType,
 		})
 	}
 
