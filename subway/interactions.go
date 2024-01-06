@@ -46,7 +46,7 @@ type InteractionCommandable struct {
 	Handler      InteractionHandler
 	ErrorHandler InteractionErrorHandler
 
-	DefaultMemberPermission *discord.Int64
+	DefaultMemberPermission discord.Int64
 	DMPermission            *bool
 
 	AutocompleteHandler InteractionAutocompleteHandler

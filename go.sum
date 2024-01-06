@@ -2,6 +2,8 @@ github.com/WelcomerTeam/Discord v0.0.0-20240103212130-b5603c89aa4e h1:3hvwZ4crDj
 github.com/WelcomerTeam/Discord v0.0.0-20240103212130-b5603c89aa4e/go.mod h1:75ay5tu71GCPIbiRt8ovHO53HEX+TMvvRQ/goBiQv04=
 github.com/WelcomerTeam/Discord v0.0.0-20240106122801-8c43fa07b121 h1:koqCR4MlLN3tTyeMv7h3RYV3OrDLDWxk3b/PSisik90=
 github.com/WelcomerTeam/Discord v0.0.0-20240106122801-8c43fa07b121/go.mod h1:75ay5tu71GCPIbiRt8ovHO53HEX+TMvvRQ/goBiQv04=
+github.com/WelcomerTeam/Discord v0.0.0-20240106132346-9455336cf6b7 h1:EcTH8eB8dgRgUdDqyZDGybHz5zWOlRThXoKUwpBRmII=
+github.com/WelcomerTeam/Discord v0.0.0-20240106132346-9455336cf6b7/go.mod h1:75ay5tu71GCPIbiRt8ovHO53HEX+TMvvRQ/goBiQv04=
 github.com/WelcomerTeam/Sandwich v0.0.0-20231219232704-27bb49720b07 h1:v/14vBaVSd4dF84YETlg/RG0WrcnTao+exlbqS0GS9g=
 github.com/WelcomerTeam/Sandwich v0.0.0-20231219232704-27bb49720b07/go.mod h1:mIdy0KxIuaZi/n/oKpLVRisUZvgg1FbH3ebZXyIPhJM=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20231218145547-86221c247942 h1:3KlLcW+ECC+AhZqfJ/3cdHfgtbyttCTWZ09NfGUgdZ0=
@@ -180,6 +182,8 @@ golang.org/x/sys v0.12.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.13.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.15.0 h1:h48lPFYpsTvQJZF4EKyI4aLHaev3CxivZmv7yZig9pc=
 golang.org/x/sys v0.15.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+golang.org/x/sys v0.16.0 h1:xWw16ngr6ZMtmxDyKyIgsE93KNKz5HKmMa3b8ALHidU=
+golang.org/x/sys v0.16.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/term v0.4.0/go.mod h1:9P2UbLfCdcvo3p/nzKvsmas4TnlujnuoV9hGgYzW1lQ=

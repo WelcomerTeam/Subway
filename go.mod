@@ -3,7 +3,7 @@ module github.com/WelcomerTeam/Subway
 go 1.21
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20240106122801-8c43fa07b121
+	github.com/WelcomerTeam/Discord v0.0.0-20240106132346-9455336cf6b7
 	github.com/WelcomerTeam/Sandwich v0.0.0-20231219232704-27bb49720b07
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20231218145547-86221c247942
 	github.com/joho/godotenv v1.5.1
@@ -42,7 +42,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.47 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
