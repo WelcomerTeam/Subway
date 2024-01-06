@@ -3,7 +3,7 @@ module github.com/WelcomerTeam/Subway
 go 1.21
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20240103212130-b5603c89aa4e
+	github.com/WelcomerTeam/Discord v0.0.0-20240106122801-8c43fa07b121
 	github.com/WelcomerTeam/Sandwich v0.0.0-20231219232704-27bb49720b07
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20231218145547-86221c247942
 	github.com/joho/godotenv v1.5.1

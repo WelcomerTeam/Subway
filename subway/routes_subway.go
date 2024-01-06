@@ -50,7 +50,9 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		elapsed := float64(time.Since(start)) / float64(time.Second)
 
 		var commandName string
+
 		var guildID string
+
 		var userID string
 
 		if interaction.Data != nil {

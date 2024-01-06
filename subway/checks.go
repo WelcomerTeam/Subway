@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"net/http"
 
-	gotils_strconv "github.com/savsgio/gotils/strconv"
+	gotils "github.com/savsgio/gotils/strconv"
 )
 
 const (
@@ -21,7 +21,7 @@ func (sub *Subway) verifySignature(request *http.Request, body []byte) bool {
 
 	timestamp := request.Header.Get(HeaderTimestamp)
 
-	return ed25519.Verify(sub.publicKey, append(gotils_strconv.S2B(timestamp), body...), sig)
+	return ed25519.Verify(sub.publicKey, append(gotils.S2B(timestamp), body...), sig)
 }
 
 func verifyEd25519Header(value string) ([]byte, bool) {

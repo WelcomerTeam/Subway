@@ -46,6 +46,9 @@ type InteractionCommandable struct {
 	Handler      InteractionHandler
 	ErrorHandler InteractionErrorHandler
 
+	DefaultMemberPermission *discord.Int64
+	DMPermission            *bool
+
 	AutocompleteHandler InteractionAutocompleteHandler
 
 	commands map[string]*InteractionCommandable
@@ -66,20 +69,15 @@ func (ic *InteractionCommandable) MapApplicationCommands() []*discord.Applicatio
 			applicationType = &applicationCommandType
 		}
 
-		nilInt64 := (discord.Int64)(0)
-
 		applicationCommands = append(applicationCommands, &discord.ApplicationCommand{
-			// ID:                0,
-			Type: applicationType,
-			// ApplicationID:     0,
-			// GuildID:           0,
 			Name:                     interactionCommandable.Name,
-			Description:              interactionCommandable.Description,
 			NameLocalizations:        interactionCommandable.NameLocalizations,
+			Description:              interactionCommandable.Description,
 			DescriptionLocalizations: interactionCommandable.DescriptionLocalizations,
 			Options:                  interactionCommandable.MapApplicationOptions(),
-			// DefaultPermission: true,
-			Version: &nilInt64,
+			DefaultMemberPermission:  interactionCommandable.DefaultMemberPermission,
+			DMPermission:             interactionCommandable.DMPermission,
+			Type:                     applicationType,
 		})
 	}
 
@@ -500,6 +498,7 @@ func MustGetArgument(ctx context.Context, name string) *Argument {
 // GetArgument returns an argument based on its name.
 func GetArgument(ctx context.Context, name string) (*Argument, error) {
 	arguments := GetArgumentsFromContext(ctx)
+
 	arg, ok := arguments[name]
 	if !ok {
 		return nil, ErrArgumentNotFound

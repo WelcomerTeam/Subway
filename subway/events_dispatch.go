@@ -56,6 +56,7 @@ func (sub *Subway) ProcessMessageComponentInteraction(ctx context.Context, inter
 	arguments := make(map[string]*Argument)
 
 	var err error
+
 	arguments, err = parseComponentData(arguments, interaction.Data)
 	if err != nil {
 		return nil, err
