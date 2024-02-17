@@ -112,9 +112,12 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 
 	var channelType discord.ChannelType
 
+	var hasChannel bool
+
 	// Map arguments.
 	for _, argument := range ic.ArgumentParameter {
-		channelType = -1
+		channelType = 0
+		hasChannel = false
 
 		switch argument.ArgumentType {
 		case ArgumentTypeSnowflake:
@@ -124,21 +127,27 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		case ArgumentTypeTextChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildText
+			hasChannel = true
 		case ArgumentTypeVoiceChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildVoice
+			hasChannel = true
 		case ArgumentTypeStageChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildStageVoice
+			hasChannel = true
 		case ArgumentTypeCategoryChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildCategory
+			hasChannel = true
 		case ArgumentTypeStoreChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildStore
+			hasChannel = true
 		case ArgumentTypeThread:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 			channelType = discord.ChannelTypeGuildPublicThread
+			hasChannel = true
 		case ArgumentTypeGuildChannel:
 			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
 		case ArgumentTypeGuild:
@@ -171,7 +180,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			Autocomplete:             argument.Autocomplete,
 		}
 
-		if channelType != -1 {
+		if hasChannel {
 			commandOption.ChannelTypes = []discord.ChannelType{channelType}
 		}
 
