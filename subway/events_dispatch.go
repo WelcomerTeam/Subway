@@ -2,10 +2,10 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // ProcessApplicationCommandInteraction processes the application command that has been received.
@@ -86,7 +86,7 @@ func parseComponentData(arguments map[string]*Argument, data *discord.Interactio
 	var argument []string
 
 	if len(data.Value) > 0 {
-		err := jsoniter.Unmarshal(data.Value, &argument)
+		err := json.Unmarshal(data.Value, &argument)
 		if err != nil {
 			return arguments, fmt.Errorf("failed to unmarshal option value: %w", err)
 		}

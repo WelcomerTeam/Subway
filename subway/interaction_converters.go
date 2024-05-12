@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"image/color"
 	"regexp"
@@ -10,7 +11,6 @@ import (
 
 	discord "github.com/WelcomerTeam/Discord/discord"
 	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 )
 
@@ -88,7 +88,7 @@ func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, in
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -123,7 +123,7 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -158,7 +158,7 @@ func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interac
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -184,7 +184,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway,
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -210,7 +210,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -256,7 +256,7 @@ func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interac
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -282,7 +282,7 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -328,7 +328,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -388,7 +388,7 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway,
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -421,7 +421,7 @@ func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, inter
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -439,7 +439,7 @@ func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interac
 
 	var argument bool
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -457,7 +457,7 @@ func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interact
 
 	var argument int64
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
@@ -475,7 +475,7 @@ func HandleInteractionArgumentTypeFloat(ctx context.Context, sub *Subway, intera
 
 	var argument string
 
-	err = jsoniter.Unmarshal(option.Value, &argument)
+	err = json.Unmarshal(option.Value, &argument)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}

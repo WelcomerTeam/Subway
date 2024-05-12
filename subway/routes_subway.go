@@ -10,7 +10,6 @@ import (
 
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
-	jsoniter "github.com/json-iterator/go"
 )
 
 var InteractionPongResponse = []byte(`{"type":1}`)
@@ -70,7 +69,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		subwayInteractionProcessingTimeName.WithLabelValues(commandName, guildID, userID).Observe(elapsed)
 	}()
 
-	err = jsoniter.Unmarshal(body, &interaction)
+	err = json.Unmarshal(body, &interaction)
 	if err != nil {
 		sub.Logger.Warn().Err(err).Msg("Failed to parse interaction")
 
