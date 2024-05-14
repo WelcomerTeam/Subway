@@ -110,30 +110,40 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 		userID = strconv.FormatInt(int64(interaction.User.ID), 10)
 	}
 
+	defer func() {
+		if err != nil {
+			subwayFailedInteractionTotal.Add(1)
+		} else {
+			subwaySuccessfulInteractionTotal.Add(1)
+		}
+	}()
+
 	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
 	if err != nil {
 		sub.Logger.Error().Err(err).Msg("Failed to process interaction")
-
-		subwayFailedInteractionTotal.Add(1)
 
 		w.WriteHeader(http.StatusNoContent)
 
 		return
 	}
 
-	subwaySuccessfulInteractionTotal.Add(1)
-
 	if response != nil {
 		resp, err := json.Marshal(response)
 		if err != nil {
+			sub.Logger.Warn().Err(err).Msg("Failed to marshal response")
+
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
 			return
 		}
 
 		w.Header().Add("Content-Type", "application/json")
-		_, _ = w.Write(resp)
+
+		_, err = w.Write(resp)
+		if err != nil {
+			sub.Logger.Warn().Err(err).Msg("Failed to write response")
+		}
 	} else {
 		sub.Logger.Warn().Msg("No response to send")
 
