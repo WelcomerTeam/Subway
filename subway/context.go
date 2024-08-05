@@ -43,12 +43,12 @@ func GetArgumentsFromContext(ctx context.Context) map[string]*Argument {
 }
 
 // RawOptions context handler.
-func AddRawOptionsToContext(ctx context.Context, v map[string]*discord.InteractionDataOption) context.Context {
+func AddRawOptionsToContext(ctx context.Context, v map[string]discord.InteractionDataOption) context.Context {
 	return context.WithValue(ctx, RawOptionsKey, v)
 }
 
-func GetRawOptionsFromContext(ctx context.Context) map[string]*discord.InteractionDataOption {
-	value, _ := ctx.Value(RawOptionsKey).(map[string]*discord.InteractionDataOption)
+func GetRawOptionsFromContext(ctx context.Context) map[string]discord.InteractionDataOption {
+	value, _ := ctx.Value(RawOptionsKey).(map[string]discord.InteractionDataOption)
 
 	return value
 }

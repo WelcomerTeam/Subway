@@ -16,7 +16,7 @@ func (sub *Subway) ProcessApplicationCommandInteraction(ctx context.Context, int
 	// Create interaction context
 	ctx = AddInteractionCommandToContext(ctx, command)
 	ctx = AddArgumentsToContext(ctx, make(map[string]*Argument))
-	ctx = AddRawOptionsToContext(ctx, extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)))
+	ctx = AddRawOptionsToContext(ctx, extractOptions(interaction.Data.Options, make(map[string]discord.InteractionDataOption)))
 	ctx = AddCommandBranchToContext(ctx, commandTree)
 	ctx = AddCommandTreeToContext(ctx, commandTree)
 
@@ -100,7 +100,7 @@ func parseComponentData(arguments map[string]*Argument, data *discord.Interactio
 	return arguments, nil
 }
 
-func convertComponentOptions(options []*discord.ApplicationSelectOption) []string {
+func convertComponentOptions(options []discord.ApplicationSelectOption) []string {
 	strings := make([]string, 0)
 
 	for _, option := range options {
@@ -110,7 +110,7 @@ func convertComponentOptions(options []*discord.ApplicationSelectOption) []strin
 	return strings
 }
 
-func constructCommandTree(options []*discord.InteractionDataOption, tree []string) []string {
+func constructCommandTree(options []discord.InteractionDataOption, tree []string) []string {
 	newTree := tree
 
 	for _, option := range options {

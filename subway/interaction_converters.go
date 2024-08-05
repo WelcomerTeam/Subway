@@ -31,7 +31,7 @@ type ArgumentParameter struct {
 	Description              string
 	NameLocalizations        map[string]string
 	DescriptionLocalizations map[string]string
-	Choices                  []*discord.ApplicationCommandOptionChoice
+	Choices                  []discord.ApplicationCommandOptionChoice
 
 	ChannelTypes []discord.ChannelType
 	MinValue     *int32
@@ -46,7 +46,7 @@ type Argument struct {
 	value        interface{}
 }
 
-type InteractionArgumentConverterType func(ctx context.Context, sub *Subway, interaction discord.Interaction, argument *discord.InteractionDataOption) (out interface{}, err error)
+type InteractionArgumentConverterType func(ctx context.Context, sub *Subway, interaction discord.Interaction, argument discord.InteractionDataOption) (out interface{}, err error)
 
 type InteractionConverters struct {
 	convertersMu sync.RWMutex
@@ -81,7 +81,7 @@ func (co *InteractionConverters) GetConverter(converterType ArgumentType) *Inter
 // HandleInteractionArgumentTypeSnowflake handles converting from a string
 // argument into a Snowflake type. Use .Snowflake() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -116,7 +116,7 @@ func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, in
 // HandleInteractionArgumentTypeMember handles converting from a string
 // argument into a Member type. Use .Member() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -134,13 +134,13 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	result := interaction.Data.Resolved.Members[snowflake]
 
-	if result == nil {
+	if result.User == nil || result.User.ID.IsNil() {
 		return nil, ErrMemberNotFound
 	}
 
-	userResult := interaction.Data.Resolved.Users[snowflake]
-	if userResult != nil {
-		result.User = userResult
+	userResult, ok := interaction.Data.Resolved.Users[snowflake]
+	if ok && !userResult.ID.IsNil() {
+		result.User = &userResult
 	} else {
 		sub.Logger.Warn().Int64("id", snowflakeID).Msg("Member present in interaction resolved, but no User is present")
 	}
@@ -151,7 +151,7 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 // HandleInteractionArgumentTypeUser handles converting from a string
 // argument into a User type. Use .User() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -167,7 +167,7 @@ func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interac
 
 	result := interaction.Data.Resolved.Users[discord.Snowflake(snowflakeID)]
 
-	if result == nil {
+	if result.ID.IsNil() {
 		return nil, ErrUserNotFound
 	}
 
@@ -177,7 +177,7 @@ func HandleInteractionArgumentTypeUser(ctx context.Context, sub *Subway, interac
 // HandleInteractionArgumentTypeGuildChannel handles converting from a string
 // argument into a TextChannel type. Use .Channel() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -193,7 +193,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway,
 
 	result := interaction.Data.Resolved.Channels[discord.Snowflake(snowflakeID)]
 
-	if result == nil {
+	if result.ID.IsNil() {
 		return nil, ErrChannelNotFound
 	}
 
@@ -203,7 +203,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx context.Context, sub *Subway,
 // HandleInteractionArgumentTypeGuild handles converting from a string
 // argument into a Guild type. Use .Guild() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -226,7 +226,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 		}
 
 		if len(guilds) > 0 {
-			result = guilds[0]
+			result = &guilds[0]
 		}
 	} else {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
@@ -249,7 +249,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 // HandleInteractionArgumentTypeRole handles converting from a string
 // argument into a Role type. Use .Role() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -265,7 +265,7 @@ func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interac
 
 	result := interaction.Data.Resolved.Roles[discord.Snowflake(snowflakeID)]
 
-	if result == nil {
+	if result.ID.IsNil() {
 		return nil, ErrRoleNotFound
 	}
 
@@ -275,7 +275,7 @@ func HandleInteractionArgumentTypeRole(ctx context.Context, sub *Subway, interac
 // HandleInteractionArgumentTypeColour handles converting from a string
 // argument into a Colour type. Use .Colour() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -321,7 +321,7 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 // HandleInteractionArgumentTypeEmoji handles converting from a string
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -360,7 +360,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 				}
 
 				if len(emojis) > 0 {
-					result = emojis[0]
+					result = &emojis[0]
 				}
 			}
 		} else {
@@ -381,7 +381,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 // HandleInteractionArgumentTypePartialEmoji handles converting from a string
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -414,7 +414,7 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway,
 // HandleInteractionArgumentTypeString handles converting from a string
 // argument into a String type. Use .String() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}
@@ -432,7 +432,7 @@ func HandleInteractionArgumentTypeString(ctx context.Context, sub *Subway, inter
 // HandleInteractionArgumentTypeBool handles converting from a string
 // argument into a Bool type. Use .Bool() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) == 0 {
 		return nil, nil
 	}
@@ -450,7 +450,7 @@ func HandleInteractionArgumentTypeBool(ctx context.Context, sub *Subway, interac
 // HandleInteractionArgumentTypeInt handles converting from a string
 // argument into a Int type. Use .Int64() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) == 0 {
 		return nil, nil
 	}
@@ -468,7 +468,7 @@ func HandleInteractionArgumentTypeInt(ctx context.Context, sub *Subway, interact
 // HandleInteractionArgumentTypeFloat handles converting from a string
 // argument into a Float type. Use .Float64() within a command
 // to get the proper type.
-func HandleInteractionArgumentTypeFloat(ctx context.Context, sub *Subway, interaction discord.Interaction, option *discord.InteractionDataOption) (out interface{}, err error) {
+func HandleInteractionArgumentTypeFloat(ctx context.Context, sub *Subway, interaction discord.Interaction, option discord.InteractionDataOption) (out interface{}, err error) {
 	if len(option.Value) <= 2 { // ""
 		return nil, nil
 	}

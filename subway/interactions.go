@@ -13,7 +13,7 @@ type InteractionCheckFuncType func(ctx context.Context, sub *Subway, interaction
 
 type (
 	InteractionHandler             func(ctx context.Context, sub *Subway, interaction discord.Interaction) (*discord.InteractionResponse, error)
-	InteractionAutocompleteHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) ([]*discord.ApplicationCommandOptionChoice, error)
+	InteractionAutocompleteHandler func(ctx context.Context, sub *Subway, interaction discord.Interaction) ([]discord.ApplicationCommandOptionChoice, error)
 	InteractionErrorHandler        func(ctx context.Context, sub *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error)
 )
 
@@ -55,8 +55,8 @@ type InteractionCommandable struct {
 	parent   *InteractionCommandable
 }
 
-func (ic *InteractionCommandable) MapApplicationCommands() []*discord.ApplicationCommand {
-	applicationCommands := make([]*discord.ApplicationCommand, 0, len(ic.commands))
+func (ic *InteractionCommandable) MapApplicationCommands() []discord.ApplicationCommand {
+	applicationCommands := make([]discord.ApplicationCommand, 0, len(ic.commands))
 
 	applicationCommandType := discord.ApplicationCommandTypeChatInput
 
@@ -69,7 +69,7 @@ func (ic *InteractionCommandable) MapApplicationCommands() []*discord.Applicatio
 			applicationType = &applicationCommandType
 		}
 
-		applicationCommands = append(applicationCommands, &discord.ApplicationCommand{
+		applicationCommands = append(applicationCommands, discord.ApplicationCommand{
 			Name:                     interactionCommandable.Name,
 			NameLocalizations:        interactionCommandable.NameLocalizations,
 			Description:              interactionCommandable.Description,
@@ -84,8 +84,8 @@ func (ic *InteractionCommandable) MapApplicationCommands() []*discord.Applicatio
 	return applicationCommands
 }
 
-func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []*discord.ApplicationCommandOption) {
-	applicationOptions = make([]*discord.ApplicationCommandOption, 0)
+func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []discord.ApplicationCommandOption) {
+	applicationOptions = make([]discord.ApplicationCommandOption, 0)
 
 	var applicationOptionType discord.ApplicationCommandOptionType
 
@@ -100,7 +100,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			applicationOptionType = discord.ApplicationCommandOptionTypeSubCommandGroup
 		}
 
-		applicationOptions = append(applicationOptions, &discord.ApplicationCommandOption{
+		applicationOptions = append(applicationOptions, discord.ApplicationCommandOption{
 			Name:                     command.Name,
 			Description:              command.Description,
 			NameLocalizations:        command.NameLocalizations,
@@ -164,7 +164,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			applicationOptionType = discord.ApplicationCommandOptionTypeInteger
 		}
 
-		commandOption := &discord.ApplicationCommandOption{
+		commandOption := discord.ApplicationCommandOption{
 			Type:                     applicationOptionType,
 			Name:                     argument.Name,
 			Description:              argument.Description,
@@ -305,7 +305,7 @@ func (ic *InteractionCommandable) GetCommand(name string) *InteractionCommandabl
 
 // IsGroup returns true if the command contains other commands.
 func (ic *InteractionCommandable) IsGroup() bool {
-	return ic.Type == InteractionCommandableTypeCommand || ic.Type == InteractionCommandableTypeSubcommandGroup
+	return ic != nil && (ic.Type == InteractionCommandableTypeCommand || ic.Type == InteractionCommandableTypeSubcommandGroup)
 }
 
 // Invoke handles the execution of a command or a group.
@@ -483,7 +483,7 @@ func (ic *InteractionCommandable) transform(ctx context.Context, sub *Subway, in
 	rawOptions := GetRawOptionsFromContext(ctx)
 
 	rawOption, ok := rawOptions[argumentParameter.Name]
-	if !ok || rawOption == nil {
+	if !ok || rawOption.Value == nil {
 		if argumentParameter.Required {
 			return nil, ErrMissingRequiredArgument
 		}
@@ -534,6 +534,10 @@ func SetupInteractionCommandable(commandable *InteractionCommandable) *Interacti
 }
 
 func (ic *InteractionCommandable) getCommand(name string) (*InteractionCommandable, bool) {
+	if ic == nil || ic.commands == nil {
+		return nil, false
+	}
+
 	commandable, ok := ic.commands[strings.ToLower(name)]
 
 	return commandable, ok
@@ -547,7 +551,7 @@ func (ic *InteractionCommandable) setCommand(name string, commandable *Interacti
 	ic.commands[strings.ToLower(name)] = commandable
 }
 
-func extractOptions(options []*discord.InteractionDataOption, optionsMap map[string]*discord.InteractionDataOption) (newOptionsMap map[string]*discord.InteractionDataOption) {
+func extractOptions(options []discord.InteractionDataOption, optionsMap map[string]discord.InteractionDataOption) (newOptionsMap map[string]discord.InteractionDataOption) {
 	for _, dataOption := range options {
 		optionsMap[dataOption.Name] = dataOption
 
