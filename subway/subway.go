@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.5"
+const VERSION = "0.6"
 
 const (
 	PermissionsDefault = 0o744
@@ -48,7 +49,7 @@ type Subway struct {
 	OnAfterInteraction  InteractionResponseHandler
 
 	// Environment Variables.
-	publicKey         ed25519.PublicKey
+	publicKeys        []ed25519.PublicKey
 	prometheusAddress string
 }
 
@@ -61,7 +62,7 @@ type SubwayOptions struct {
 	OnBeforeInteraction InteractionRequestHandler
 	OnAfterInteraction  InteractionResponseHandler
 
-	PublicKey         string
+	PublicKeys        string
 	PrometheusAddress string
 
 	// Maximum age for component listeners. Defaults to 15 minutes.
@@ -94,11 +95,17 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 		Cogs: make(map[string]Cog),
 	}
 
-	var err error
+	// Setup public keys
+	publicKeys := strings.Split(options.PublicKeys, ",")
+	sub.publicKeys = make([]ed25519.PublicKey, 0, len(publicKeys))
 
-	sub.publicKey, err = hex.DecodeString(options.PublicKey)
-	if err != nil {
-		return nil, ErrInvalidPublicKey
+	for _, publicKey := range publicKeys {
+		hex, err := hex.DecodeString(publicKey)
+		if err != nil {
+			return nil, ErrInvalidPublicKey
+		}
+
+		sub.publicKeys = append(sub.publicKeys, ed25519.PublicKey(hex))
 	}
 
 	// Setup sessions
