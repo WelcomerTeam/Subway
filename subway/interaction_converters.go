@@ -311,10 +311,6 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 		}
 	}
 
-	if err != nil {
-		return nil, ErrBadColourArgument
-	}
-
 	return result, nil
 }
 
