@@ -400,13 +400,13 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway,
 
 	matches := PartialEmojiRegex.FindStringSubmatch(argument)
 
-	var result *discord.Emoji
+	var result discord.Emoji
 
 	if len(matches) >= 4 {
 		animated := matches[1] != ""
 		id, _ := strconv.ParseInt(matches[3], 10, 64)
 
-		result = &discord.Emoji{
+		result = discord.Emoji{
 			Animated: animated,
 			Name:     matches[2],
 			ID:       discord.Snowflake(id),

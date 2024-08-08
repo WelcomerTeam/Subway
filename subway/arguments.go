@@ -14,11 +14,7 @@ import (
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Snowflake() (discord.Snowflake, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeSnowflake) {
-		value, ok := a.value.(discord.Snowflake)
-
-		if !ok {
-			return discord.Snowflake(0), ErrConversionError
-		}
+		value, _ := a.value.(discord.Snowflake)
 
 		return value, nil
 	}
@@ -41,11 +37,7 @@ func (a *Argument) MustSnowflake() discord.Snowflake {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Member() (discord.GuildMember, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeMember) {
-		value, ok := a.value.(discord.GuildMember)
-
-		if !ok {
-			return discord.GuildMember{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.GuildMember)
 
 		return value, nil
 	}
@@ -68,11 +60,7 @@ func (a *Argument) MustMember() discord.GuildMember {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) User() (discord.User, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeUser) {
-		value, ok := a.value.(discord.User)
-
-		if !ok {
-			return discord.User{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.User)
 
 		return value, nil
 	}
@@ -97,11 +85,7 @@ func (a *Argument) Channel() (discord.Channel, error) {
 	if argumentTypeIs(a.ArgumentType,
 		ArgumentTypeTextChannel, ArgumentTypeVoiceChannel, ArgumentTypeStageChannel,
 		ArgumentTypeCategoryChannel, ArgumentTypeStoreChannel, ArgumentTypeGuildChannel) {
-		value, ok := a.value.(discord.Channel)
-
-		if !ok {
-			return discord.Channel{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.Channel)
 
 		return value, nil
 	}
@@ -124,11 +108,7 @@ func (a *Argument) MustChannel() discord.Channel {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Guild() (discord.Guild, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeGuild) {
-		value, ok := a.value.(discord.Guild)
-
-		if !ok {
-			return discord.Guild{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.Guild)
 
 		return value, nil
 	}
@@ -151,11 +131,7 @@ func (a *Argument) MustGuild() discord.Guild {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Role() (discord.Role, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeRole) {
-		value, ok := a.value.(discord.Role)
-
-		if !ok {
-			return discord.Role{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.Role)
 
 		return value, nil
 	}
@@ -178,11 +154,7 @@ func (a *Argument) MustRole() discord.Role {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Colour() (color.RGBA, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeColour) {
-		value, ok := a.value.(color.RGBA)
-
-		if !ok {
-			return color.RGBA{}, ErrConversionError
-		}
+		value, _ := a.value.(color.RGBA)
 
 		return value, nil
 	}
@@ -205,11 +177,7 @@ func (a *Argument) MustColour() color.RGBA {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Emoji() (discord.Emoji, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeEmoji, ArgumentTypePartialEmoji) {
-		value, ok := a.value.(discord.Emoji)
-
-		if !ok {
-			return discord.Emoji{}, ErrConversionError
-		}
+		value, _ := a.value.(discord.Emoji)
 
 		return value, nil
 	}
@@ -232,11 +200,7 @@ func (a *Argument) MustEmoji() discord.Emoji {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) String() (string, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeString) {
-		value, ok := a.value.(string)
-
-		if !ok {
-			return "", ErrConversionError
-		}
+		value, _ := a.value.(string)
 
 		return value, nil
 	}
@@ -259,11 +223,7 @@ func (a *Argument) MustString() string {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Bool() (bool, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeBool) {
-		value, ok := a.value.(bool)
-
-		if !ok {
-			return false, ErrConversionError
-		}
+		value, _ := a.value.(bool)
 
 		return value, nil
 	}
@@ -286,11 +246,7 @@ func (a *Argument) MustBool() bool {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Int() (int64, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeInt) {
-		value, ok := a.value.(int64)
-
-		if !ok {
-			return 0, ErrConversionError
-		}
+		value, _ := a.value.(int64)
 
 		return value, nil
 	}
@@ -313,11 +269,7 @@ func (a *Argument) MustInt() int64 {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Float() (float64, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeFloat) {
-		value, ok := a.value.(float64)
-
-		if !ok {
-			return 0, ErrConversionError
-		}
+		value, _ := a.value.(float64)
 
 		return value, nil
 	}
@@ -340,11 +292,7 @@ func (a *Argument) MustFloat() float64 {
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Strings() ([]string, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeStrings) {
-		value, ok := a.value.([]string)
-
-		if !ok {
-			return nil, ErrConversionError
-		}
+		value, _ := a.value.([]string)
 
 		return value, nil
 	}
