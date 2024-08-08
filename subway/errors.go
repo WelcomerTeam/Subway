@@ -20,6 +20,7 @@ var (
 	ErrCogAlreadyRegistered     = errors.New("cog with this name already exists")
 	ErrCommandAlreadyRegistered = errors.New("command with this name already exists")
 	ErrInvalidArgumentType      = errors.New("argument value is not correct type for converter used")
+	ErrConversionError          = errors.New("failed to convert argument to desired type")
 
 	ErrCommandNotFound             = errors.New("command with this name was not found")
 	ErrCommandAutoCompleteNotFound = errors.New("autocomplete for command with this name was not found")
