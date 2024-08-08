@@ -130,14 +130,14 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	snowflake := discord.Snowflake(snowflakeID)
 
-	result := interaction.Data.Resolved.Members[snowflake]
+	result, ok := interaction.Data.Resolved.Members[snowflake]
 
-	if result.User == nil || result.User.ID.IsNil() {
+	if !ok {
 		return nil, ErrMemberNotFound
 	}
 
 	userResult, ok := interaction.Data.Resolved.Users[snowflake]
-	if ok && !userResult.ID.IsNil() {
+	if ok {
 		result.User = &userResult
 	} else {
 		sub.Logger.Warn().Int64("id", snowflakeID).Msg("Member present in interaction resolved, but no User is present")
