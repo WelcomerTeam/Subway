@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/WelcomerTeam/Discord/discord"
 )
@@ -18,7 +19,22 @@ const (
 	CommandTreeKey
 	IdentifierKey
 	ComponentListenerKey
+	URLKey
 )
+
+// URL context handler.
+func AddURLToContext(ctx context.Context, v url.URL) context.Context {
+	return context.WithValue(ctx, URLKey, v)
+}
+
+func GetURLFromContext(ctx context.Context) url.URL {
+	value, ok := ctx.Value(URLKey).(url.URL)
+	if !ok {
+		panic("GetURLFromContext(): failed to get URL from context")
+	}
+
+	return value
+}
 
 // InteractionCommand context handler.
 func AddInteractionCommandToContext(ctx context.Context, v *InteractionCommandable) context.Context {

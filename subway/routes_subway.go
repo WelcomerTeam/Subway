@@ -91,11 +91,14 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	var response *discord.InteractionResponse
 
+	ctx := sub.Context
+	ctx = AddURLToContext(ctx, *r.URL)
+
 	switch interaction.Type {
 	case discord.InteractionTypeApplicationCommand, discord.InteractionTypeApplicationCommandAutocomplete:
-		response, err = sub.ProcessApplicationCommandInteraction(sub.Context, interaction)
+		response, err = sub.ProcessApplicationCommandInteraction(ctx, interaction)
 	case discord.InteractionTypeMessageComponent:
-		response, err = sub.ProcessMessageComponentInteraction(sub.Context, interaction)
+		response, err = sub.ProcessMessageComponentInteraction(ctx, interaction)
 	// case discord.InteractionTypeModalSubmit:
 	// 	// not implemented
 	default:
