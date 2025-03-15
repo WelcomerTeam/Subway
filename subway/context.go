@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/WelcomerTeam/Discord/discord"
 )
@@ -18,7 +19,22 @@ const (
 	CommandTreeKey
 	IdentifierKey
 	ComponentListenerKey
+	URLKey
 )
+
+// URL context handler.
+func AddURLToContext(ctx context.Context, v url.URL) context.Context {
+	return context.WithValue(ctx, URLKey, v)
+}
+
+func GetURLFromContext(ctx context.Context) url.URL {
+	value, ok := ctx.Value(URLKey).(url.URL)
+	if !ok {
+		panic("GetURLFromContext(): failed to get URL from context")
+	}
+
+	return value
+}
 
 // InteractionCommand context handler.
 func AddInteractionCommandToContext(ctx context.Context, v *InteractionCommandable) context.Context {
@@ -26,7 +42,10 @@ func AddInteractionCommandToContext(ctx context.Context, v *InteractionCommandab
 }
 
 func GetInteractionCommandFromContext(ctx context.Context) *InteractionCommandable {
-	value, _ := ctx.Value(InteractionCommandKey).(*InteractionCommandable)
+	value, ok := ctx.Value(InteractionCommandKey).(*InteractionCommandable)
+	if !ok {
+		panic("GetInteractionCommandFromContext(): failed to get InteractionCommand from context")
+	}
 
 	return value
 }
@@ -37,7 +56,10 @@ func AddArgumentsToContext(ctx context.Context, v map[string]*Argument) context.
 }
 
 func GetArgumentsFromContext(ctx context.Context) map[string]*Argument {
-	value, _ := ctx.Value(ArgumentsKey).(map[string]*Argument)
+	value, ok := ctx.Value(ArgumentsKey).(map[string]*Argument)
+	if !ok {
+		panic("GetArgumentsFromContext(): failed to get Arguments from context")
+	}
 
 	return value
 }
@@ -48,7 +70,10 @@ func AddRawOptionsToContext(ctx context.Context, v map[string]discord.Interactio
 }
 
 func GetRawOptionsFromContext(ctx context.Context) map[string]discord.InteractionDataOption {
-	value, _ := ctx.Value(RawOptionsKey).(map[string]discord.InteractionDataOption)
+	value, ok := ctx.Value(RawOptionsKey).(map[string]discord.InteractionDataOption)
+	if !ok {
+		panic("GetRawOptionsFromContext(): failed to get RawOptions from context")
+	}
 
 	return value
 }
@@ -59,7 +84,10 @@ func AddCommandBranchToContext(ctx context.Context, v []string) context.Context 
 }
 
 func GetCommandBranchFromContext(ctx context.Context) []string {
-	value, _ := ctx.Value(CommandBranchKey).([]string)
+	value, ok := ctx.Value(CommandBranchKey).([]string)
+	if !ok {
+		panic("GetCommandBranchFromContext(): failed to get CommandBranch from context")
+	}
 
 	return value
 }
@@ -70,7 +98,10 @@ func AddCommandTreeToContext(ctx context.Context, v []string) context.Context {
 }
 
 func GetCommandTreeFromContext(ctx context.Context) []string {
-	value, _ := ctx.Value(CommandTreeKey).([]string)
+	value, ok := ctx.Value(CommandTreeKey).([]string)
+	if !ok {
+		panic("GetCommandTreeFromContext(): failed to get CommandTree from context")
+	}
 
 	return value
 }
@@ -81,7 +112,10 @@ func AddIdentifierToContext(ctx context.Context, v string) context.Context {
 }
 
 func GetIdentifierFromContext(ctx context.Context) string {
-	value, _ := ctx.Value(IdentifierKey).(string)
+	value, ok := ctx.Value(IdentifierKey).(string)
+	if !ok {
+		panic("GetIdentifierFromContext(): failed to get Identifier from context")
+	}
 
 	return value
 }
@@ -92,7 +126,10 @@ func AddComponentListenerToContext(ctx context.Context, v *ComponentListener) co
 }
 
 func GetComponentListenerFromContext(ctx context.Context) *ComponentListener {
-	value, _ := ctx.Value(ComponentListenerKey).(*ComponentListener)
+	value, ok := ctx.Value(ComponentListenerKey).(*ComponentListener)
+	if !ok {
+		panic("GetComponentListenerFromContext(): failed to get ComponentListener from context")
+	}
 
 	return value
 }

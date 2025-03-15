@@ -31,7 +31,7 @@ func main() {
 	prometheusAddress := flag.String("prometheusAddress", os.Getenv("INTERACTIONS_PROMETHEUS_ADDRESS"), "Prometheus address")
 
 	host := flag.String("host", os.Getenv("INTERACTIONS_HOST"), "Host to serve interactions from")
-	publicKey := flag.String("publicKey", os.Getenv("INTERACTIONS_PUBLIC_KEY"), "Public key for signature validation")
+	publicKeys := flag.String("publicKey", os.Getenv("INTERACTIONS_PUBLIC_KEY"), "Public key(s) for signature validation. Comma delimited.")
 
 	dryRun := flag.Bool("dryRun", false, "When true, will close after setting up the app")
 
@@ -47,7 +47,7 @@ func main() {
 	restInterface.SetDebug(*proxyDebug)
 
 	// Setup GRPC
-	grpcConnection, err := grpc.Dial(*sandwichGRPCHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnection, err := grpc.NewClient(*sandwichGRPCHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(fmt.Errorf(`failed to parse grpcAddress. grpc.Dial(%s): %w`, *sandwichGRPCHost, err))
 	}
@@ -75,7 +75,7 @@ func main() {
 		SandwichClient:    protobuf.NewSandwichClient(grpcConnection),
 		RESTInterface:     restInterface,
 		Logger:            logger,
-		PublicKey:         *publicKey,
+		PublicKeys:        *publicKeys,
 		PrometheusAddress: *prometheusAddress,
 	})
 	if err != nil {

@@ -12,18 +12,18 @@ import (
 // Snowflake returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Snowflake() (*discord.Snowflake, error) {
+func (a *Argument) Snowflake() (discord.Snowflake, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeSnowflake) {
-		value, _ := a.value.(*discord.Snowflake)
+		value, _ := a.value.(discord.Snowflake)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.Snowflake(0), ErrInvalidArgumentType
 }
 
 // MustSnowflake will attempt to do Snowflake() and will panic if not possible.
-func (a *Argument) MustSnowflake() *discord.Snowflake {
+func (a *Argument) MustSnowflake() discord.Snowflake {
 	value, err := a.Snowflake()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Snowflake(): %v`, err.Error()))
@@ -35,18 +35,18 @@ func (a *Argument) MustSnowflake() *discord.Snowflake {
 // Member returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Member() (*discord.GuildMember, error) {
+func (a *Argument) Member() (discord.GuildMember, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeMember) {
-		value, _ := a.value.(*discord.GuildMember)
+		value, _ := a.value.(discord.GuildMember)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.GuildMember{}, ErrInvalidArgumentType
 }
 
 // MustMember will attempt to do Member() and will panic if not possible.
-func (a *Argument) MustMember() *discord.GuildMember {
+func (a *Argument) MustMember() discord.GuildMember {
 	value, err := a.Member()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Member(): %v`, err.Error()))
@@ -58,18 +58,18 @@ func (a *Argument) MustMember() *discord.GuildMember {
 // User returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) User() (*discord.User, error) {
+func (a *Argument) User() (discord.User, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeUser) {
-		value, _ := a.value.(*discord.User)
+		value, _ := a.value.(discord.User)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.User{}, ErrInvalidArgumentType
 }
 
 // MustUser will attempt to do User() and will panic if not possible.
-func (a *Argument) MustUser() *discord.User {
+func (a *Argument) MustUser() discord.User {
 	value, err := a.User()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: User(): %v`, err.Error()))
@@ -81,20 +81,20 @@ func (a *Argument) MustUser() *discord.User {
 // Channel returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Channel() (*discord.Channel, error) {
+func (a *Argument) Channel() (discord.Channel, error) {
 	if argumentTypeIs(a.ArgumentType,
 		ArgumentTypeTextChannel, ArgumentTypeVoiceChannel, ArgumentTypeStageChannel,
 		ArgumentTypeCategoryChannel, ArgumentTypeStoreChannel, ArgumentTypeGuildChannel) {
-		value, _ := a.value.(*discord.Channel)
+		value, _ := a.value.(discord.Channel)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.Channel{}, ErrInvalidArgumentType
 }
 
 // MustTextChannel will attempt to do Channel() and will panic if not possible.
-func (a *Argument) MustChannel() *discord.Channel {
+func (a *Argument) MustChannel() discord.Channel {
 	value, err := a.Channel()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Channel(): %v`, err.Error()))
@@ -106,18 +106,18 @@ func (a *Argument) MustChannel() *discord.Channel {
 // Guild returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Guild() (*discord.Guild, error) {
+func (a *Argument) Guild() (discord.Guild, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeGuild) {
-		value, _ := a.value.(*discord.Guild)
+		value, _ := a.value.(discord.Guild)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.Guild{}, ErrInvalidArgumentType
 }
 
 // MustGuild will attempt to do Guild() and will panic if not possible.
-func (a *Argument) MustGuild() *discord.Guild {
+func (a *Argument) MustGuild() discord.Guild {
 	value, err := a.Guild()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Guild(): %v`, err.Error()))
@@ -129,18 +129,18 @@ func (a *Argument) MustGuild() *discord.Guild {
 // Role returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Role() (*discord.Role, error) {
+func (a *Argument) Role() (discord.Role, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeRole) {
-		value, _ := a.value.(*discord.Role)
+		value, _ := a.value.(discord.Role)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.Role{}, ErrInvalidArgumentType
 }
 
 // MustRole will attempt to do Role() and will panic if not possible.
-func (a *Argument) MustRole() *discord.Role {
+func (a *Argument) MustRole() discord.Role {
 	value, err := a.Role()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Role(): %v`, err.Error()))
@@ -152,18 +152,18 @@ func (a *Argument) MustRole() *discord.Role {
 // Colour returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Colour() (*color.RGBA, error) {
+func (a *Argument) Colour() (color.RGBA, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeColour) {
-		value, _ := a.value.(*color.RGBA)
+		value, _ := a.value.(color.RGBA)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return color.RGBA{}, ErrInvalidArgumentType
 }
 
 // MustColour will attempt to do Colour() and will panic if not possible.
-func (a *Argument) MustColour() *color.RGBA {
+func (a *Argument) MustColour() color.RGBA {
 	value, err := a.Colour()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Colour(): %v`, err.Error()))
@@ -175,18 +175,18 @@ func (a *Argument) MustColour() *color.RGBA {
 // Emoji returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Emoji() (*discord.Emoji, error) {
+func (a *Argument) Emoji() (discord.Emoji, error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeEmoji, ArgumentTypePartialEmoji) {
-		value, _ := a.value.(*discord.Emoji)
+		value, _ := a.value.(discord.Emoji)
 
 		return value, nil
 	}
 
-	return nil, ErrInvalidArgumentType
+	return discord.Emoji{}, ErrInvalidArgumentType
 }
 
 // MustEmoji will attempt to do Emoji() and will panic if not possible.
-func (a *Argument) MustEmoji() *discord.Emoji {
+func (a *Argument) MustEmoji() discord.Emoji {
 	value, err := a.Emoji()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Emoji(): %v`, err.Error()))

@@ -101,14 +101,12 @@ func HandleInteractionArgumentTypeSnowflake(ctx context.Context, sub *Subway, in
 		}
 	}
 
-	var result *discord.Snowflake
-
 	if match == "" {
 		return nil, ErrSnowflakeNotFound
 	}
 
 	snowflakeID, _ := strconv.ParseInt(match, 10, 64)
-	result = (*discord.Snowflake)(&snowflakeID)
+	result := discord.Snowflake(snowflakeID)
 
 	return result, nil
 }
@@ -132,14 +130,14 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	snowflake := discord.Snowflake(snowflakeID)
 
-	result := interaction.Data.Resolved.Members[snowflake]
+	result, ok := interaction.Data.Resolved.Members[snowflake]
 
-	if result.User == nil || result.User.ID.IsNil() {
+	if !ok {
 		return nil, ErrMemberNotFound
 	}
 
 	userResult, ok := interaction.Data.Resolved.Users[snowflake]
-	if ok && !userResult.ID.IsNil() {
+	if ok {
 		result.User = &userResult
 	} else {
 		sub.Logger.Warn().Int64("id", snowflakeID).Msg("Member present in interaction resolved, but no User is present")
@@ -217,29 +215,31 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 
 	match := IDRegex.FindString(argument)
 
-	var result *discord.Guild
+	var result discord.Guild
 
 	if match == "" {
-		guilds, err := sub.GRPCInterface.FetchGuildsByName(sub.NewGRPCContext(ctx), argument)
+		gGuilds, err := sub.GRPCInterface.FetchGuildsByName(sub.NewGRPCContext(ctx), argument)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch guild: %w", err)
 		}
 
-		if len(guilds) > 0 {
-			result = &guilds[0]
+		if len(gGuilds) > 0 {
+			result = gGuilds[0]
 		}
 	} else {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
 
-		result = sandwich.NewGuild(discord.Snowflake(guildID))
+		sGuild := sandwich.NewGuild(discord.Snowflake(guildID))
 
-		result, err = sandwich.FetchGuild(sub.NewGRPCContext(ctx), result)
+		sGuild, err = sandwich.FetchGuild(sub.NewGRPCContext(ctx), sGuild)
 		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, fmt.Errorf("failed to fetch guild: %w", err)
 		}
+
+		result = *sGuild
 	}
 
-	if result == nil {
+	if result.ID.IsNil() {
 		return nil, ErrGuildNotFound
 	}
 
@@ -287,7 +287,7 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
 
-	var result *color.RGBA
+	var result color.RGBA
 
 	switch {
 	case argument[0] == '#':
@@ -311,10 +311,6 @@ func HandleInteractionArgumentTypeColour(ctx context.Context, sub *Subway, inter
 		}
 	}
 
-	if result == nil {
-		return nil, ErrBadColourArgument
-	}
-
 	return result, nil
 }
 
@@ -333,7 +329,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 		return nil, fmt.Errorf("failed to unmarshal option value: %w", err)
 	}
 
-	var result *discord.Emoji
+	var result discord.Emoji
 
 	match := IDRegex.FindString(argument)
 	if match == "" {
@@ -343,7 +339,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 			animated := matches[1] != ""
 			id, _ := strconv.ParseInt(matches[3], 10, 64)
 
-			result = &discord.Emoji{
+			result = discord.Emoji{
 				Animated: animated,
 				Name:     matches[2],
 				ID:       discord.Snowflake(id),
@@ -351,7 +347,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 		}
 	}
 
-	if result == nil {
+	if result.ID.IsNil() {
 		if match == "" {
 			if interaction.GuildID != nil {
 				emojis, err := sub.GRPCInterface.FetchEmojisByName(sub.NewGRPCContext(ctx), *interaction.GuildID, argument)
@@ -360,19 +356,24 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 				}
 
 				if len(emojis) > 0 {
-					result = &emojis[0]
+					result = emojis[0]
 				}
 			}
 		} else {
 			emojiID, _ := strconv.ParseInt(match, 10, 64)
 
-			result = sandwich.NewEmoji(interaction.GuildID, discord.Snowflake(emojiID))
+			gEmoji := sandwich.NewEmoji(interaction.GuildID, discord.Snowflake(emojiID))
+			result = *gEmoji
 		}
 	}
 
-	result, err = sandwich.FetchEmoji(sub.NewGRPCContext(ctx), result)
+	gEmoji, err := sandwich.FetchEmoji(sub.NewGRPCContext(ctx), &result)
 	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, fmt.Errorf("failed to fetch emoji: %w", err)
+	}
+
+	if gEmoji != nil {
+		result = *gEmoji
 	}
 
 	return result, nil
@@ -395,13 +396,13 @@ func HandleInteractionArgumentTypePartialEmoji(ctx context.Context, sub *Subway,
 
 	matches := PartialEmojiRegex.FindStringSubmatch(argument)
 
-	var result *discord.Emoji
+	var result discord.Emoji
 
 	if len(matches) >= 4 {
 		animated := matches[1] != ""
 		id, _ := strconv.ParseInt(matches[3], 10, 64)
 
-		result = &discord.Emoji{
+		result = discord.Emoji{
 			Animated: animated,
 			Name:     matches[2],
 			ID:       discord.Snowflake(id),

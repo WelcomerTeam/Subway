@@ -21,7 +21,15 @@ func (sub *Subway) verifySignature(request *http.Request, body []byte) bool {
 
 	timestamp := request.Header.Get(HeaderTimestamp)
 
-	return ed25519.Verify(sub.publicKey, append(gotils.S2B(timestamp), body...), sig)
+	message := append(gotils.S2B(timestamp), body...)
+
+	for _, key := range sub.publicKeys {
+		if ed25519.Verify(key, message, sig) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func verifyEd25519Header(value string) ([]byte, bool) {
