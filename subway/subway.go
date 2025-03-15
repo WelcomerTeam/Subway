@@ -17,7 +17,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.6"
+const VERSION = "0.7"
 
 const (
 	PermissionsDefault = 0o744
@@ -109,7 +109,7 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	}
 
 	// Setup sessions
-	sub.EmptySession = discord.NewSession(ctx, "", sub.RESTInterface)
+	sub.EmptySession = discord.NewSession("", sub.RESTInterface)
 
 	if options.MaximumInteractionAge <= 0 {
 		options.MaximumInteractionAge = defaultMaximumInteractionAge
@@ -188,11 +188,11 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 // Use sandwichClient.FetchIdentifier to get the token for an identifier.
 // Token must have "Bot " added.
 func (sub *Subway) SyncCommands(ctx context.Context, token string, applicationID discord.Snowflake) error {
-	session := discord.NewSession(ctx, token, sub.RESTInterface)
+	session := discord.NewSession(token, sub.RESTInterface)
 
 	applicationCommands := sub.Commands.MapApplicationCommands()
 
-	_, err := discord.BulkOverwriteGlobalApplicationCommands(session, applicationID, applicationCommands)
+	_, err := discord.BulkOverwriteGlobalApplicationCommands(ctx, session, applicationID, applicationCommands)
 	if err != nil {
 		return fmt.Errorf("failed to bulk overwrite commands: %w", err)
 	}
