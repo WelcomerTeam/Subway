@@ -4,16 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
+	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 	subway "github.com/WelcomerTeam/Subway/subway"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -53,20 +52,14 @@ func main() {
 	}
 
 	// Setup Logger
-	level, err := zerolog.ParseLevel(*loggingLevel)
+	level := slog.LevelDebug
+	err = level.UnmarshalText([]byte(*loggingLevel))
 	if err != nil {
-		panic(fmt.Errorf(`failed to parse loggingLevel. zerolog.ParseLevel(%s): %w`, *loggingLevel, err))
+		panic(fmt.Errorf(`failed to parse loggingLevel. level.UnmarshalText(%s): %w`, *loggingLevel, err))
 	}
 
-	zerolog.SetGlobalLevel(level)
-
-	writer := zerolog.ConsoleWriter{
-		Out:        os.Stdout,
-		TimeFormat: time.Stamp,
-	}
-
-	logger := zerolog.New(writer).With().Timestamp().Logger()
-	logger.Info().Msg("Logging configured")
+	logger := slog.Default()
+	logger.Info("Logging configured")
 
 	context, cancel := context.WithCancel(context.Background())
 
@@ -79,7 +72,7 @@ func main() {
 		PrometheusAddress: *prometheusAddress,
 	})
 	if err != nil {
-		logger.Panic().Err(err).Msg("Exception creating app")
+		logger.Error("Error creating subway", "error", err)
 	}
 
 	// Register Cogs here. Either via app.RegisterCog or app.MustRegisterCog
@@ -95,14 +88,14 @@ func main() {
 
 	err = app.ListenAndServe("", *host)
 	if err != nil {
-		logger.Warn().Err(err).Msg("Exceptions whilst starting app")
+		logger.Warn("Exception whilst starting app", "error", err)
 	}
 
 	cancel()
 
 	err = grpcConnection.Close()
 	if err != nil {
-		logger.Warn().Err(err).Msg("Exception whilst closing grpc client")
+		logger.Warn("Exception whilst closing grpc client", "error", err)
 	}
 }
 

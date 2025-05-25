@@ -130,17 +130,16 @@ func HandleInteractionArgumentTypeMember(ctx context.Context, sub *Subway, inter
 
 	snowflake := discord.Snowflake(snowflakeID)
 
-	result, ok := interaction.Data.Resolved.Members[snowflake]
-
-	if !ok {
+	result, memberPresent := interaction.Data.Resolved.Members[snowflake]
+	if !memberPresent {
 		return nil, ErrMemberNotFound
 	}
 
-	userResult, ok := interaction.Data.Resolved.Users[snowflake]
-	if ok {
+	userResult, userPresent := interaction.Data.Resolved.Users[snowflake]
+	if userPresent {
 		result.User = &userResult
 	} else {
-		sub.Logger.Warn().Int64("id", snowflakeID).Msg("Member present in interaction resolved, but no User is present")
+		sub.Logger.Warn("Member present in interaction resolved, but no User is present", "id", snowflakeID)
 	}
 
 	return result, nil
@@ -217,16 +216,7 @@ func HandleInteractionArgumentTypeGuild(ctx context.Context, sub *Subway, intera
 
 	var result discord.Guild
 
-	if match == "" {
-		gGuilds, err := sub.GRPCInterface.FetchGuildsByName(sub.NewGRPCContext(ctx), argument)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch guild: %w", err)
-		}
-
-		if len(gGuilds) > 0 {
-			result = gGuilds[0]
-		}
-	} else {
+	if match != "" {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
 
 		sGuild := sandwich.NewGuild(discord.Snowflake(guildID))
@@ -348,18 +338,7 @@ func HandleInteractionArgumentTypeEmoji(ctx context.Context, sub *Subway, intera
 	}
 
 	if result.ID.IsNil() {
-		if match == "" {
-			if interaction.GuildID != nil {
-				emojis, err := sub.GRPCInterface.FetchEmojisByName(sub.NewGRPCContext(ctx), *interaction.GuildID, argument)
-				if err != nil {
-					return nil, fmt.Errorf("failed to fetch emoji: %w", err)
-				}
-
-				if len(emojis) > 0 {
-					result = emojis[0]
-				}
-			}
-		} else {
+		if match != "" {
 			emojiID, _ := strconv.ParseInt(match, 10, 64)
 
 			gEmoji := sandwich.NewEmoji(interaction.GuildID, discord.Snowflake(emojiID))

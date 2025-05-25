@@ -159,17 +159,17 @@ func (sub *Subway) RegisterCog(cog Cog) error {
 	}
 
 	if err := cog.RegisterCog(sub); err != nil {
-		sub.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register Cog")
+		sub.Logger.Error("Failed to register Cog", "cog", cogInfo.Name, "error", err)
 
 		return fmt.Errorf("failed to register cog: %w", err)
 	}
 
 	sub.Cogs[cogInfo.Name] = cog
 
-	sub.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded Cog")
+	sub.Logger.Info("Loaded Cog", "cog", cogInfo.Name)
 
 	if cast, ok := cog.(CogWithBotLoad); ok {
-		sub.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
+		sub.Logger.Info("Cog has BotLoad", "cog", cogInfo.Name)
 
 		cast.BotLoad(sub)
 	}
@@ -177,10 +177,7 @@ func (sub *Subway) RegisterCog(cog Cog) error {
 	if cast, ok := cog.(CogWithInteractionCommands); ok {
 		interactionCommandable := cast.GetInteractionCommandable()
 
-		sub.Logger.Info().
-			Str("cog", cogInfo.Name).
-			Int("commands", len(interactionCommandable.GetAllCommands())).
-			Msg("Cog has interaction commands")
+		sub.Logger.Info("Cog has interaction commands", "cog", cogInfo.Name, "commands", len(interactionCommandable.GetAllCommands()))
 
 		sub.RegisterCogInteractionCommandable(cog, interactionCommandable)
 	}
@@ -193,7 +190,7 @@ func (sub *Subway) RegisterCogInteractionCommandable(cog Cog, interactionCommand
 		// Add Cog checks to all commands.
 		command.Checks = append(interactionCommandable.Checks, command.Checks...)
 
-		sub.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
+		sub.Logger.Debug("Registering interaction command", "name", command.Name)
 
 		sub.Commands.MustAddInteractionCommand(command)
 	}

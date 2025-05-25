@@ -5,19 +5,18 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
-	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
-	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
-	"github.com/rs/zerolog"
+	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.7.1"
+const VERSION = "1.0.0"
 
 const (
 	PermissionsDefault = 0o744
@@ -29,18 +28,17 @@ const (
 type Subway struct {
 	context.Context
 
-	Logger    zerolog.Logger `json:"-"`
-	StartTime time.Time      `json:"start_time" yaml:"start_time"`
+	Logger    *slog.Logger `json:"-"`
+	StartTime time.Time    `json:"start_time" yaml:"start_time"`
 
 	Commands   *InteractionCommandable `json:"-"`
 	Converters *InteractionConverters  `json:"-"`
 
 	Cogs map[string]Cog `json:"-"`
 
-	SandwichClient protobuf.SandwichClient `json:"-"`
-	GRPCInterface  sandwich.GRPC           `json:"-"`
-	RESTInterface  discord.RESTInterface   `json:"-"`
-	EmptySession   *discord.Session        `json:"-"`
+	SandwichClient sandwich_protobuf.SandwichClient `json:"-"`
+	RESTInterface  discord.RESTInterface            `json:"-"`
+	EmptySession   *discord.Session                 `json:"-"`
 
 	ComponentListenersMu sync.RWMutex
 	ComponentListeners   map[string]*ComponentListener
@@ -55,9 +53,9 @@ type Subway struct {
 
 // SubwayOptions represents the options to create a new subway service.
 type SubwayOptions struct {
-	SandwichClient protobuf.SandwichClient
+	SandwichClient sandwich_protobuf.SandwichClient
 	RESTInterface  discord.RESTInterface
-	Logger         zerolog.Logger
+	Logger         *slog.Logger
 
 	OnBeforeInteraction InteractionRequestHandler
 	OnAfterInteraction  InteractionResponseHandler
@@ -79,7 +77,6 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 
 		RESTInterface:  options.RESTInterface,
 		SandwichClient: options.SandwichClient,
-		GRPCInterface:  sandwich.NewDefaultGRPCClient(),
 
 		ComponentListenersMu: sync.RWMutex{},
 		ComponentListeners:   make(map[string]*ComponentListener),
@@ -164,19 +161,19 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 	}
 
 	sub.StartTime = time.Now().UTC()
-	sub.Logger.Info().Msgf("Starting subway Version %s", VERSION)
+	sub.Logger.Info("Starting subway", "version", VERSION)
 
 	// Setup Prometheus
 	go sub.SetupPrometheus()
 
-	sub.Logger.Info().Msgf("Serving subway at %s", host)
+	sub.Logger.Info("Serving subway", "host", host)
 
 	subwayMux := http.NewServeMux()
 	subwayMux.HandleFunc(route, sub.HandleSubwayRequest)
 
 	err := http.ListenAndServe(host, subwayMux)
 	if err != nil {
-		sub.Logger.Error().Str("host", sub.prometheusAddress).Err(err).Msg("Failed to serve subway server")
+		sub.Logger.Error("Failed to serve subway server", "host", sub.prometheusAddress, "error", err)
 
 		return fmt.Errorf("failed to serve sub: %w", err)
 	}

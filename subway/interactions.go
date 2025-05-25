@@ -326,10 +326,7 @@ func (ic *InteractionCommandable) Invoke(ctx context.Context, sub *Subway, inter
 			return commandable.Invoke(commandContext, sub, interaction)
 		}
 
-		sub.Logger.Warn().
-			Str("command", ic.Name).
-			Str("branch", commandBranch[0]).
-			Msg("Encountered non-group whilst traversing command tree.")
+		sub.Logger.Warn("Encountered non-group whilst traversing command tree", "command", ic.Name, "branch", commandBranch[0])
 	}
 
 	ctx, err := ic.prepare(ctx, sub, interaction)
@@ -340,7 +337,7 @@ func (ic *InteractionCommandable) Invoke(ctx context.Context, sub *Subway, inter
 	defer func() {
 		errorValue := recover()
 		if errorValue != nil {
-			sub.Logger.Error().Interface("errorValue", errorValue).Msg("Recovered panic on event dispatch")
+			sub.Logger.Error("Recovered panic on event dispatch", "errorValue", errorValue)
 
 			ic.propagateError(ctx, sub, interaction, PanicError{errorValue})
 		}
@@ -411,8 +408,8 @@ func (ic *InteractionCommandable) propagateError(ctx context.Context, sub *Subwa
 }
 
 // Default error propagator. This will just log an exception.
-func defaultErrorPropagator(ctx context.Context, sub *Subway, interaction discord.Interaction, err error) (*discord.InteractionResponse, error) {
-	sub.Logger.Error().Err(err).Msg("Exception executing interaction")
+func defaultErrorPropagator(_ context.Context, sub *Subway, _ discord.Interaction, err error) (*discord.InteractionResponse, error) {
+	sub.Logger.Error("Exception executing interaction", "error", err)
 
 	return nil, err
 }

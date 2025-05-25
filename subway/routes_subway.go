@@ -27,7 +27,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		sub.Logger.Warn().Err(err).Msg("Failed to read body")
+		sub.Logger.Warn("Failed to read body", "error", err)
 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
@@ -36,7 +36,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	verified := sub.verifySignature(r, body)
 	if !verified {
-		sub.Logger.Warn().Msg("Sender passed invalid signature")
+		sub.Logger.Warn("Sender passed invalid signature")
 
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 
@@ -71,7 +71,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &interaction)
 	if err != nil {
-		sub.Logger.Warn().Err(err).Msg("Failed to parse interaction")
+		sub.Logger.Warn("Failed to parse interaction", "error", err)
 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
@@ -102,7 +102,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	// case discord.InteractionTypeModalSubmit:
 	// 	// not implemented
 	default:
-		sub.Logger.Warn().Int("interaction_type", int(interaction.Type)).Msg("Missing interaction handler")
+		sub.Logger.Warn("Missing interaction handler", "interaction_type", int(interaction.Type))
 	}
 
 	if interaction.GuildID != nil {
@@ -124,7 +124,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	subwayInteractionTotal.WithLabelValues(interaction.Data.Name, guildID, userID).Add(1)
 
 	if err != nil {
-		sub.Logger.Error().Err(err).Msg("Failed to process interaction")
+		sub.Logger.Error("Failed to process interaction", "error", err)
 
 		w.WriteHeader(http.StatusNoContent)
 
@@ -134,7 +134,7 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	if response != nil {
 		resp, err := json.Marshal(response)
 		if err != nil {
-			sub.Logger.Warn().Err(err).Msg("Failed to marshal response")
+			sub.Logger.Warn("Failed to marshal response", "error", err)
 
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 
@@ -145,10 +145,10 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 
 		_, err = w.Write(resp)
 		if err != nil {
-			sub.Logger.Warn().Err(err).Msg("Failed to write response")
+			sub.Logger.Warn("Failed to write response", "error", err)
 		}
 	} else {
-		sub.Logger.Warn().Msg("No response to send")
+		sub.Logger.Warn("No response to send")
 
 		w.WriteHeader(http.StatusNoContent)
 	}
@@ -159,6 +159,5 @@ func (sub *Subway) NewGRPCContext(ctx context.Context) *sandwich.GRPCContext {
 		Context:        ctx,
 		Logger:         sub.Logger,
 		SandwichClient: sub.SandwichClient,
-		GRPCInterface:  sub.GRPCInterface,
 	}
 }

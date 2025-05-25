@@ -42,7 +42,7 @@ var (
 
 // SetupPrometheus sets up prometheus.
 func (sub *Subway) SetupPrometheus() error {
-	sub.Logger.Info().Msgf("Serving prometheus at %s", sub.prometheusAddress)
+	sub.Logger.Info("Serving prometheus", "host", sub.prometheusAddress)
 
 	prometheus.MustRegister(subwayInteractionProcessingTimeName)
 	prometheus.MustRegister(subwayInteractionTotal)
@@ -57,7 +57,7 @@ func (sub *Subway) SetupPrometheus() error {
 
 	err := http.ListenAndServe(sub.prometheusAddress, prometheusMux)
 	if err != nil {
-		sub.Logger.Error().Str("host", sub.prometheusAddress).Err(err).Msg("Failed to serve prometheus server")
+		sub.Logger.Error("Failed to serve prometheus server", "host", sub.prometheusAddress, "error", err)
 
 		return fmt.Errorf("failed to serve prometheus: %w", err)
 	}
