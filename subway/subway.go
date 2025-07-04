@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
@@ -16,7 +17,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "1.0.0"
+const VERSION = "1.0.1"
 
 const (
 	PermissionsDefault = 0o744
@@ -47,7 +48,7 @@ type Subway struct {
 	OnAfterInteraction  InteractionResponseHandler
 
 	// Environment Variables.
-	publicKeys        []ed25519.PublicKey
+	PublicKeys        *atomic.Pointer[[]ed25519.PublicKey]
 	prometheusAddress string
 }
 
@@ -90,19 +91,12 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 		Converters: NewInteractionConverters(),
 
 		Cogs: make(map[string]Cog),
+
+		PublicKeys: &atomic.Pointer[[]ed25519.PublicKey]{},
 	}
 
-	// Setup public keys
-	publicKeys := strings.Split(options.PublicKeys, ",")
-	sub.publicKeys = make([]ed25519.PublicKey, 0, len(publicKeys))
-
-	for _, publicKey := range publicKeys {
-		hex, err := hex.DecodeString(publicKey)
-		if err != nil {
-			return nil, ErrInvalidPublicKey
-		}
-
-		sub.publicKeys = append(sub.publicKeys, ed25519.PublicKey(hex))
+	if err := sub.SetPublicKeys(strings.Split(options.PublicKeys, ","), false); err != nil {
+		return nil, fmt.Errorf("failed to set public keys: %w", err)
 	}
 
 	// Setup sessions
@@ -115,6 +109,59 @@ func NewSubway(ctx context.Context, options SubwayOptions) (*Subway, error) {
 	go sub.InteractionCleanupJob(ctx, options.MaximumInteractionAge)
 
 	return sub, nil
+}
+
+func (sub *Subway) AddPublicKey(publicKeyString string) error {
+	hex, err := hex.DecodeString(publicKeyString)
+	if err != nil {
+		return fmt.Errorf("failed to decode public key %s: %w", publicKeyString, err)
+	}
+
+	if len(hex) != ed25519.PublicKeySize {
+		return fmt.Errorf("invalid public key size: expected %d, got %d", ed25519.PublicKeySize, len(hex))
+	}
+
+	publicKeysPtr := sub.PublicKeys.Load()
+	publicKeys := *publicKeysPtr
+	publicKeys = append(publicKeys, ed25519.PublicKey(hex))
+	sub.PublicKeys.Store(&publicKeys)
+
+	return nil
+}
+
+func (sub *Subway) SetPublicKeys(publicKeyStrings []string, ignoreErrors bool) error {
+	publicKeys := make([]ed25519.PublicKey, 0)
+	sub.PublicKeys.Store(&publicKeys)
+
+	// Setup public keys
+	for _, publicKey := range publicKeyStrings {
+		hex, err := hex.DecodeString(publicKey)
+		if err != nil {
+			if ignoreErrors {
+				sub.Logger.Error("Failed to decode public key, ignoring", "public_key", publicKey, "error", err)
+
+				continue
+			}
+
+			return fmt.Errorf("failed to decode public key %s: %w", publicKey, err)
+		}
+
+		if len(hex) != ed25519.PublicKeySize {
+			if ignoreErrors {
+				sub.Logger.Error("Invalid public key size, ignoring", "public_key", publicKey, "expected", ed25519.PublicKeySize, "got", len(hex))
+
+				continue
+			}
+
+			return fmt.Errorf("invalid public key size: expected %d, got %d", ed25519.PublicKeySize, len(hex))
+		}
+
+		publicKeys = append(publicKeys, ed25519.PublicKey(hex))
+	}
+
+	sub.PublicKeys.Store(&publicKeys)
+
+	return nil
 }
 
 func (sub *Subway) InteractionCleanupJob(ctx context.Context, maximumAge time.Duration) {
