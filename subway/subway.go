@@ -17,7 +17,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "1.0.1"
+const VERSION = "1.1"
 
 const (
 	PermissionsDefault = 0o744
@@ -201,12 +201,24 @@ func (sub *Subway) cleanupInteractions(maximumAge time.Duration) {
 	}
 }
 
-// Listen handles starting up the webserver and services for you.
-func (sub *Subway) ListenAndServe(route, host string) error {
+func (sub *Subway) PrepareMux(route string, mux *http.ServeMux) *http.ServeMux {
 	if route == "" {
 		route = "/"
 	}
 
+	// If no mux is provided, create a new one.
+	// This allows you to use your own mux if you want to.
+	if mux == nil {
+		mux = http.NewServeMux()
+	}
+
+	mux.HandleFunc(route, sub.HandleSubwayRequest)
+
+	return mux
+}
+
+// Listen handles starting up the webserver and services for you.
+func (sub *Subway) ListenAndServe(route, host string, mux *http.ServeMux) error {
 	sub.StartTime = time.Now().UTC()
 	sub.Logger.Info("Starting subway", "version", VERSION)
 
@@ -215,10 +227,12 @@ func (sub *Subway) ListenAndServe(route, host string) error {
 
 	sub.Logger.Info("Serving subway", "host", host)
 
-	subwayMux := http.NewServeMux()
-	subwayMux.HandleFunc(route, sub.HandleSubwayRequest)
+	server := &http.Server{
+		Addr:    host,
+		Handler: sub.PrepareMux(route, mux),
+	}
 
-	err := http.ListenAndServe(host, subwayMux)
+	err := server.ListenAndServe()
 	if err != nil {
 		sub.Logger.Error("Failed to serve subway server", "host", sub.prometheusAddress, "error", err)
 

@@ -86,7 +86,7 @@ func main() {
 		return
 	}
 
-	err = app.ListenAndServe("", *host)
+	err = app.ListenAndServe("", *host, nil)
 	if err != nil {
 		logger.Warn("Exception whilst starting app", "error", err)
 	}
