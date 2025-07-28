@@ -23,7 +23,7 @@ func (sub *Subway) verifySignature(request *http.Request, body []byte) bool {
 
 	message := append(gotils.S2B(timestamp), body...)
 
-	for _, key := range *sub.PublicKeys.Load() {
+	for _, key := range sub.PublicKeys.GetPublicKeys(request) {
 		if ed25519.Verify(key, message, sig) {
 			return true
 		}
