@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path"
 
 	"github.com/WelcomerTeam/Discord/discord"
 )
@@ -43,10 +44,32 @@ func (sub *Subway) ProcessApplicationCommandInteraction(ctx context.Context, int
 	return response, err
 }
 
+// Checks if search custom ID matches the key, using the path.Match function
+// Keys can be in a pattern such as "button_*" to match any custom ID that starts with "button_".
+func keyMatches(pattern, name string) bool {
+	matches, err := path.Match(pattern, name)
+	if err != nil {
+		return false
+	}
+
+	return matches
+}
+
 // ProcessMessageComponentInteraction processes the message component that has been received.
 func (sub *Subway) ProcessMessageComponentInteraction(ctx context.Context, interaction discord.Interaction) (*discord.InteractionResponse, error) {
+	var listener *ComponentListener
+
+	var hasListener bool
+
 	sub.ComponentListenersMu.RLock()
-	listener, hasListener := sub.ComponentListeners[interaction.Data.CustomID]
+	for key, componentListener := range sub.ComponentListeners {
+		if key == interaction.Data.CustomID || keyMatches(key, interaction.Data.CustomID) {
+			listener = componentListener
+			hasListener = true
+
+			break
+		}
+	}
 	sub.ComponentListenersMu.RUnlock()
 
 	if !hasListener {
