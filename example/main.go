@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/WelcomerTeam/Discord/discord"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
@@ -20,6 +23,26 @@ import (
 const (
 	PermissionsDefault = 0o744
 )
+
+type StaticPublicKeysHandler struct {
+	Keys []ed25519.PublicKey
+}
+
+func (h StaticPublicKeysHandler) GetPublicKeys(_ *http.Request) []ed25519.PublicKey {
+	return h.Keys
+}
+
+func NewStaticPublicKeysHandler(keys []string) StaticPublicKeysHandler {
+	publicKeys := make([]ed25519.PublicKey, len(keys))
+
+	for i, key := range keys {
+		publicKeys[i] = ed25519.PublicKey(key)
+	}
+
+	return StaticPublicKeysHandler{
+		Keys: publicKeys,
+	}
+}
 
 func main() {
 	loggingLevel := flag.String("level", os.Getenv("LOGGING_LEVEL"), "Logging level")
@@ -66,9 +89,9 @@ func main() {
 	// Setup app.
 	app, err := subway.NewSubway(context, subway.SubwayOptions{
 		SandwichClient:    protobuf.NewSandwichClient(grpcConnection),
-		RESTInterface:     restInterface,
+		RESTInterface:     &restInterface,
 		Logger:            logger,
-		PublicKeys:        *publicKeys,
+		PublicKeysHandler: NewStaticPublicKeysHandler(strings.Split(*publicKeys, ",")),
 		PrometheusAddress: *prometheusAddress,
 	})
 	if err != nil {
