@@ -1,6 +1,6 @@
 module github.com/WelcomerTeam/Subway
 
-go 1.25.1
+go 1.26
 
 require (
 	github.com/WelcomerTeam/Discord v0.0.0-20260215222339-e1f701394291

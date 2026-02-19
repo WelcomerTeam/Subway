@@ -50,7 +50,7 @@ var (
 )
 
 type PanicError struct {
-	Recover interface{}
+	Recover any
 }
 
 func (cp PanicError) Error() string {

@@ -471,7 +471,7 @@ func (ic *InteractionCommandable) parseArguments(ctx context.Context, sub *Subwa
 }
 
 // transform returns a output value based on the argument parameter passed in.
-func (ic *InteractionCommandable) transform(ctx context.Context, sub *Subway, interaction discord.Interaction, argumentParameter ArgumentParameter) (out interface{}, err error) {
+func (ic *InteractionCommandable) transform(ctx context.Context, sub *Subway, interaction discord.Interaction, argumentParameter ArgumentParameter) (out any, err error) {
 	converter := sub.Converters.GetConverter(argumentParameter.ArgumentType)
 	if converter == nil {
 		return nil, ErrConverterNotFound

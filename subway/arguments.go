@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"image/color"
+	"slices"
 
 	"github.com/WelcomerTeam/Discord/discord"
 )
@@ -13,7 +14,7 @@ import (
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Snowflake() (discord.Snowflake, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeSnowflake) {
+	if a.ArgumentType == ArgumentTypeSnowflake {
 		value, _ := a.value.(discord.Snowflake)
 
 		return value, nil
@@ -36,7 +37,7 @@ func (a *Argument) MustSnowflake() discord.Snowflake {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Member() (discord.GuildMember, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeMember) {
+	if a.ArgumentType == ArgumentTypeMember {
 		value, _ := a.value.(discord.GuildMember)
 
 		return value, nil
@@ -59,7 +60,7 @@ func (a *Argument) MustMember() discord.GuildMember {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) User() (discord.User, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeUser) {
+	if a.ArgumentType == ArgumentTypeUser {
 		value, _ := a.value.(discord.User)
 
 		return value, nil
@@ -78,13 +79,20 @@ func (a *Argument) MustUser() discord.User {
 	return value
 }
 
+var channelAcceptedTypes = []ArgumentType{
+	ArgumentTypeTextChannel,
+	ArgumentTypeVoiceChannel,
+	ArgumentTypeStageChannel,
+	ArgumentTypeCategoryChannel,
+	ArgumentTypeStoreChannel,
+	ArgumentTypeGuildChannel,
+}
+
 // Channel returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Channel() (discord.Channel, error) {
-	if argumentTypeIs(a.ArgumentType,
-		ArgumentTypeTextChannel, ArgumentTypeVoiceChannel, ArgumentTypeStageChannel,
-		ArgumentTypeCategoryChannel, ArgumentTypeStoreChannel, ArgumentTypeGuildChannel) {
+	if slices.Contains(channelAcceptedTypes, a.ArgumentType) {
 		value, _ := a.value.(discord.Channel)
 
 		return value, nil
@@ -93,7 +101,7 @@ func (a *Argument) Channel() (discord.Channel, error) {
 	return discord.Channel{}, ErrInvalidArgumentType
 }
 
-// MustTextChannel will attempt to do Channel() and will panic if not possible.
+// MustChannel will attempt to do Channel() and will panic if not possible.
 func (a *Argument) MustChannel() discord.Channel {
 	value, err := a.Channel()
 	if err != nil {
@@ -107,7 +115,7 @@ func (a *Argument) MustChannel() discord.Channel {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Guild() (discord.Guild, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeGuild) {
+	if a.ArgumentType == ArgumentTypeGuild {
 		value, _ := a.value.(discord.Guild)
 
 		return value, nil
@@ -130,7 +138,7 @@ func (a *Argument) MustGuild() discord.Guild {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Role() (discord.Role, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeRole) {
+	if a.ArgumentType == ArgumentTypeRole {
 		value, _ := a.value.(discord.Role)
 
 		return value, nil
@@ -153,7 +161,7 @@ func (a *Argument) MustRole() discord.Role {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Colour() (color.RGBA, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeColour) {
+	if a.ArgumentType == ArgumentTypeColour {
 		value, _ := a.value.(color.RGBA)
 
 		return value, nil
@@ -176,7 +184,7 @@ func (a *Argument) MustColour() color.RGBA {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Emoji() (discord.Emoji, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeEmoji, ArgumentTypePartialEmoji) {
+	if a.ArgumentType == ArgumentTypeEmoji || a.ArgumentType == ArgumentTypePartialEmoji {
 		value, _ := a.value.(discord.Emoji)
 
 		return value, nil
@@ -199,7 +207,7 @@ func (a *Argument) MustEmoji() discord.Emoji {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) String() (string, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeString) {
+	if a.ArgumentType == ArgumentTypeString {
 		value, _ := a.value.(string)
 
 		return value, nil
@@ -222,7 +230,7 @@ func (a *Argument) MustString() string {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Bool() (bool, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeBool) {
+	if a.ArgumentType == ArgumentTypeBool {
 		value, _ := a.value.(bool)
 
 		return value, nil
@@ -245,7 +253,7 @@ func (a *Argument) MustBool() bool {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Int() (int64, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeInt) {
+	if a.ArgumentType == ArgumentTypeInt {
 		value, _ := a.value.(int64)
 
 		return value, nil
@@ -268,7 +276,7 @@ func (a *Argument) MustInt() int64 {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Float() (float64, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeFloat) {
+	if a.ArgumentType == ArgumentTypeFloat {
 		value, _ := a.value.(float64)
 
 		return value, nil
@@ -291,7 +299,7 @@ func (a *Argument) MustFloat() float64 {
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
 func (a *Argument) Strings() ([]string, error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeStrings) {
+	if a.ArgumentType == ArgumentTypeStrings {
 		value, _ := a.value.([]string)
 
 		return value, nil
@@ -308,14 +316,4 @@ func (a *Argument) MustStrings() []string {
 	}
 
 	return value
-}
-
-func argumentTypeIs(argumentType ArgumentType, argumentTypes ...ArgumentType) bool {
-	for _, aType := range argumentTypes {
-		if argumentType == aType {
-			return true
-		}
-	}
-
-	return false
 }

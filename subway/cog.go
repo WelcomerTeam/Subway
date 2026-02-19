@@ -6,7 +6,7 @@ type CogInfo struct {
 	Name        string
 	Description string
 
-	Meta interface{}
+	Meta any
 }
 
 // Cog is the basic interface for any cog. This must provide information about the cog

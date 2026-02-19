@@ -123,16 +123,6 @@ func parseComponentData(arguments map[string]*Argument, data *discord.Interactio
 	return arguments, nil
 }
 
-func convertComponentOptions(options []discord.ApplicationSelectOption) []string {
-	strings := make([]string, 0)
-
-	for _, option := range options {
-		strings = append(strings, option.Value)
-	}
-
-	return strings
-}
-
 func constructCommandTree(options []discord.InteractionDataOption, tree []string) []string {
 	newTree := tree
 
