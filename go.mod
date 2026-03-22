@@ -3,14 +3,14 @@ module github.com/WelcomerTeam/Subway
 go 1.26
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20260215222339-e1f701394291
-	github.com/WelcomerTeam/Sandwich v0.0.0-20260117232955-ff8ccfeeb944
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20260117103610-349cfd19aa9a
+	github.com/WelcomerTeam/Discord v0.0.0-20260322115948-8040d0f1005f
+	github.com/WelcomerTeam/Sandwich v0.0.0-20260322170931-61406f17b909
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20260322165858-683b139b5584
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/savsgio/gotils v0.0.0-20250924091648-bce9a52d7761
-	google.golang.org/grpc v1.79.1
+	google.golang.org/grpc v1.79.3
 )
 
 require (
@@ -21,11 +21,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
-	github.com/prometheus/procfs v0.19.2 // indirect
-	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.50.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
+	github.com/prometheus/procfs v0.20.1 // indirect
+	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260319201613-d00831a3d3e7 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
