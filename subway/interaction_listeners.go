@@ -6,6 +6,18 @@ import (
 	"github.com/WelcomerTeam/Discord/discord"
 )
 
+// Creates a permanent component listener with no expiration.
+// This is useful for components that are expected to be interacted with indefinitely, such as a persistent menu or a long-running interactive message.
+func (sub *Subway) RegisterComponentListener(customID string, handler InteractionHandler) {
+	sub.ComponentListenersMu.Lock()
+	sub.ComponentListeners[customID] = &ComponentListener{
+		Channel:            nil,
+		InitialInteraction: discord.Interaction{},
+		Handler:            handler,
+	}
+	sub.ComponentListenersMu.Unlock()
+}
+
 type ComponentListener struct {
 	Channel            chan *discord.Interaction
 	InitialInteraction discord.Interaction
