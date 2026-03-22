@@ -97,10 +97,8 @@ func (sub *Subway) HandleSubwayRequest(w http.ResponseWriter, r *http.Request) {
 	switch interaction.Type {
 	case discord.InteractionTypeApplicationCommand, discord.InteractionTypeApplicationCommandAutocomplete:
 		response, err = sub.ProcessApplicationCommandInteraction(ctx, interaction)
-	case discord.InteractionTypeMessageComponent:
+	case discord.InteractionTypeMessageComponent, discord.InteractionTypeModalSubmit:
 		response, err = sub.ProcessMessageComponentInteraction(ctx, interaction)
-	// case discord.InteractionTypeModalSubmit:
-	// 	// not implemented
 	default:
 		sub.Logger.Warn("Missing interaction handler", "interaction_type", int(interaction.Type))
 	}
