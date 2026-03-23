@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path"
 
@@ -80,6 +79,8 @@ func (sub *Subway) ProcessMessageComponentInteraction(ctx context.Context, inter
 
 	var err error
 
+	// Currently message component arguments will only be stored as string or strings.
+	// TODO: Add arguments to ComponentListener to allow for type transformation.
 	arguments, err = parseComponentData(arguments, interaction.Data)
 	if err != nil {
 		return nil, err
@@ -99,28 +100,37 @@ func (sub *Subway) ProcessMessageComponentInteraction(ctx context.Context, inter
 
 // parseComponentData generates the arguments for a component interaction.
 func parseComponentData(arguments map[string]*Argument, data *discord.InteractionData) (map[string]*Argument, error) {
-	// Now, for simplicity, we will just return the string list we receive from discord.
-	// Optimally, we could properly handle all the different types for the select and appropriately
-	// use the associated data structures, but making it in a way that wasn't ugly was proving not easy.
-
-	// We will let the user decide what they want to do with the list of values. They have access to
-	// the interaction payload so they have the resolved records already.
-
-	var argument []string
-
-	if len(data.Value) > 0 {
-		err := json.Unmarshal(data.Value, &argument)
-		if err != nil {
-			return arguments, fmt.Errorf("failed to unmarshal option value: %w", err)
-		}
-
-		arguments[data.CustomID] = &Argument{
-			ArgumentType: ArgumentTypeStrings,
-			value:        argument,
-		}
+	for _, component := range data.Components {
+		arguments = extractValues(component, arguments)
 	}
 
 	return arguments, nil
+}
+
+func extractValues(component discord.InteractionComponent, arguments map[string]*Argument) map[string]*Argument {
+	for _, componentChild := range component.Components {
+		arguments = extractValues(componentChild, arguments)
+	}
+
+	if component.Component != nil {
+		arguments = extractValues(*component.Component, arguments)
+	}
+
+	if len(component.Value) > 0 {
+		arguments[component.CustomID] = &Argument{
+			ArgumentType: ArgumentTypeString,
+			value:        component.Value,
+		}
+	}
+
+	if len(component.Values) > 0 {
+		arguments[component.CustomID] = &Argument{
+			ArgumentType: ArgumentTypeStrings,
+			value:        component.Values,
+		}
+	}
+
+	return arguments
 }
 
 func constructCommandTree(options []discord.InteractionDataOption, tree []string) []string {
