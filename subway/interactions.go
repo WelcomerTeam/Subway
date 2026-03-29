@@ -275,9 +275,8 @@ func (ic *InteractionCommandable) GetAllCommands() []*InteractionCommandable {
 }
 
 func (ic *InteractionCommandable) GetCommand(name string) *InteractionCommandable {
-	if !strings.Contains(name, " ") {
-		command, _ := ic.getCommand(name)
-
+	command, ok := ic.getCommand(name)
+	if ok || !strings.Contains(name, " ") {
 		return command
 	}
 
@@ -286,12 +285,10 @@ func (ic *InteractionCommandable) GetCommand(name string) *InteractionCommandabl
 		return nil
 	}
 
-	command := ic.GetCommand(names[0])
+	command = ic.GetCommand(names[0])
 	if !command.IsGroup() {
 		return command
 	}
-
-	var ok bool
 
 	for _, name := range names[1:] {
 		command, ok = command.getCommand(name)
