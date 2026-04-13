@@ -107,6 +107,8 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 			DescriptionLocalizations: command.DescriptionLocalizations,
 			Options:                  command.MapApplicationOptions(),
 			Type:                     applicationOptionType,
+			DefaultMemberPermission:  command.DefaultMemberPermission,
+			DMPermission:             command.DMPermission,
 		})
 	}
 
