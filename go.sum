@@ -1,7 +1,5 @@
-github.com/WelcomerTeam/Discord v0.0.0-20260328112928-8804aec6aa5e h1:eqIAqmO+IhJ8lvoxAofqxi5piozi2pUXTDhwOFlB1d0=
-github.com/WelcomerTeam/Discord v0.0.0-20260328112928-8804aec6aa5e/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
-github.com/WelcomerTeam/Discord v0.0.0-20260413141854-8f4d7eaa688d h1:GBxv6cLsehZMcZZp6VFzBFcWv3yijwxob3cro+82YqU=
-github.com/WelcomerTeam/Discord v0.0.0-20260413141854-8f4d7eaa688d/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
+github.com/WelcomerTeam/Discord v0.0.0-20260502095414-9ddb6029aaf7 h1:BPrF0QWMFhXX/fU8Ss/gDhS3tRxrhqSisCCRG79SJuI=
+github.com/WelcomerTeam/Discord v0.0.0-20260502095414-9ddb6029aaf7/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
 github.com/WelcomerTeam/Sandwich v0.0.0-20260322170931-61406f17b909 h1:KcOTFz9hAvMtaKrsMvQa38vSJpAjpEJpc1dbiVU+Rqg=
 github.com/WelcomerTeam/Sandwich v0.0.0-20260322170931-61406f17b909/go.mod h1:Qnj/xSWU+y5GjoXz6WJZEvY0h67CQjB3nAOG+kyRLjQ=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20260412131253-edad15fd4ca4 h1:qwEc4nPMbhRlQwK5uVxq4F3PbJOuV5+68rlVKSfq2DE=

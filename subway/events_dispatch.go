@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 
@@ -107,6 +108,49 @@ func parseComponentData(arguments map[string]*Argument, data *discord.Interactio
 	return arguments, nil
 }
 
+// Infer the type of the value based on its JSON representation.
+func inferType(value json.RawMessage) (ArgumentType, any) {
+	// Handle strings
+	if value[0] == '"' {
+		var strValue string
+		if err := json.Unmarshal(value, &strValue); err == nil {
+			return ArgumentTypeString, strValue
+		}
+	}
+
+	// Handle booleans
+	if value[0] == 't' || value[0] == 'f' {
+		var boolValue bool
+		if err := json.Unmarshal(value, &boolValue); err == nil {
+			return ArgumentTypeBool, boolValue
+		}
+	}
+
+	// Handle numbers (integers and floats)
+	if value[0] == '-' || (value[0] >= '0' && value[0] <= '9') {
+		var intValue int
+		if err := json.Unmarshal(value, &intValue); err == nil {
+			return ArgumentTypeInt, intValue
+		}
+
+		var floatValue float64
+		if err := json.Unmarshal(value, &floatValue); err == nil {
+			return ArgumentTypeFloat, floatValue
+		}
+	}
+
+	// Handle arrays of strings
+	if value[0] == '[' {
+		var strSliceValue []string
+		if err := json.Unmarshal(value, &strSliceValue); err == nil {
+			return ArgumentTypeStrings, strSliceValue
+		}
+	}
+
+	// If all else fails, treat it as a string (this is a fallback and probably will not be correct).
+	return ArgumentTypeString, string(value)
+}
+
 func extractValues(component discord.InteractionComponent, arguments map[string]*Argument) map[string]*Argument {
 	for _, componentChild := range component.Components {
 		arguments = extractValues(componentChild, arguments)
@@ -117,9 +161,10 @@ func extractValues(component discord.InteractionComponent, arguments map[string]
 	}
 
 	if len(component.Value) > 0 {
+		argumentType, value := inferType(component.Value)
 		arguments[component.CustomID] = &Argument{
-			ArgumentType: ArgumentTypeString,
-			value:        component.Value,
+			ArgumentType: argumentType,
+			value:        value,
 		}
 	}
 
